@@ -707,7 +707,7 @@ function app() {
         for (const pair of formData.entries())data[pair[0]] = pair[1];
         // do execute
         try {
-            create(data["network"], data["threshold"], data["signers"].split(","));
+            create(data["network"], data["threshold"], data["signers"].split("\n"));
         } catch (e) {
             log(e.toString());
             console.error(e);
