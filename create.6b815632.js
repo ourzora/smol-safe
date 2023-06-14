@@ -694,7 +694,6 @@ function app() {
             });
             runit(data["network"], data["operation"], data["safeAddress"], txn);
         } catch (e) {
-            log(e);
             alert(e.toString());
             return;
         }
@@ -706,12 +705,7 @@ function app() {
         const formData = new FormData(executeForm);
         for (const pair of formData.entries())data[pair[0]] = pair[1];
         // do execute
-        try {
-            create(data["network"], data["threshold"], data["signers"].split(","));
-        } catch (e) {
-            log(e.toString());
-            console.error(e);
-        }
+        create(data["network"], data["threshold"], data["signers"].split(","));
     });
 }
 app();
@@ -66032,4 +66026,4 @@ Object.defineProperty(exports, "Utf8ErrorReason", {
 
 },{"c5c2bd91fcdd56a0":"fYeCq","be425cd73b65df6a":"ggdAz","c438d65b9f731717":"329Wu","e46329d8515ae10a":"dm2o4","aacee32e630a3c01":"htrqZ","7d4b4cee87647dd4":"7JYPm","660087fb0b2cb5f9":"8PpMD","646ba75a470acb17":"1qqTy","f85bab1f52710db8":"hXDEv","65d4e23dfd00972c":"hLvB2","cfd30efb7898026b":"k4R8k","63927c7d54893bc8":"7K4RF","43faf31148ccdf7d":"7myQM","8a2382f07377ea70":"h3GJb","672eac8c66b28311":"b2vlp","91b515954d564c8":"krGB2","ae80aad22dc44a27":"5TGFZ","7c6612209d19fcf":"d1ust","5ff7cc785096a11b":"kGZhx","43ff35b8b417e2c6":"2DfhD","47285f2008254354":"5yjI3"}]},["9Alg7","kuM8f"], "kuM8f", "parcelRequireb59e")
 
-//# sourceMappingURL=index.6b815632.js.map
+//# sourceMappingURL=create.6b815632.js.map
