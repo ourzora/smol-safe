@@ -44,40 +44,21 @@
         <input type="submit" />
     </form>
 
-
-
-    <h5>log</h5>
-    <ul id="log">
-
-
-
       <form id="create">
         <h2>create a SAFE on the current MM network</h2>
         <label>
-          USERS:
-          <input type="text" name="signers" />
+          USERS: (one per line)
+          <textarea rows="4" name="signers"></textarea>
         </label>
         <label>
           THRESHOLD:
           <input name="threshold" type="text" />
         </label>
-        <!-- <div>
-          <strong>NETWORK:</strong>
-          <label
-            >ZORA TESTNET
-            <input
-              type="radio"
-              name="network"
-              value="https://testnet.rpc.zora.co/"
-          /></label>
-          <label
-            >ZORA MAINNET
-            <input type="radio" name="network" value="https://rpc.zora.co/"
-          /></label>
-        </div> -->
         <input type="submit" />
       </form>
 
+    <h5>log</h5>
+    <ul id="log">
     </ul>
 </main>
   </body>

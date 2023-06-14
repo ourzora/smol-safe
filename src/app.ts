@@ -143,7 +143,7 @@ function app() {
       }
       // do execute
       try {
-        create(data["network"], data["threshold"], data["signers"].split(","));
+        create(data["network"], data["threshold"], data["signers"].split("\n"));
       } catch (e) {
         log(e.toString());
         console.error(e);
