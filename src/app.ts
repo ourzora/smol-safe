@@ -4,6 +4,7 @@ import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import Safe, {
   ContractNetworksConfig,
   EthersAdapter,
+  SafeFactory,
 } from "@safe-global/protocol-kit";
 import { ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
@@ -91,6 +92,21 @@ async function runit(network, operation, safeAddress, transaction) {
   }
 }
 
+async function create(network: string, threshold: string, signers: string[]) {
+  const signer = new ethers.providers.Web3Provider(
+    (window as any).ethereum
+  ).getSigner();
+  const ethAdapter = new EthersAdapter({ ethers, signerOrProvider: signer });
+  const adapter = await SafeFactory.create({ ethAdapter, contractNetworks });
+  const sdk = await adapter.deploySafe({
+    safeAccountConfig: {
+      owners: signers,
+      threshold: parseInt(threshold, 10),
+    },
+  });
+  log(`deployed: ${await sdk.getAddress()}`);
+}
+
 function app() {
   const signForm = document.querySelector("#sign");
   if (signForm) {
@@ -110,12 +126,13 @@ function app() {
         console.log({ txn });
         runit(data["network"], data["operation"], data["safeAddress"], txn);
       } catch (e) {
+        log(e);
         alert(e.toString());
         return;
       }
     });
   }
-  const executeForm = document.querySelector("#execute");
+  const executeForm = document.querySelector("#create");
   if (executeForm) {
     executeForm.addEventListener("submit", (evt) => {
       evt.preventDefault();
@@ -125,7 +142,12 @@ function app() {
         data[pair[0]] = pair[1];
       }
       // do execute
-      execute(data["safeAddress"], data["txnHash"]);
+      try {
+        create(data["network"], data["threshold"], data["signers"].split(","));
+      } catch (e) {
+        log(e.toString());
+        console.error(e);
+      }
     });
   }
 }
