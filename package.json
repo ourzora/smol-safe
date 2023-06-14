@@ -4,15 +4,14 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@anders-t/ethers-ledger": "^1.0.4",
     "@ethersproject/contracts": "^5.7.0",
-    "@ethersproject/hardware-wallets": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@ethersproject/wallet": "^5.7.0",
-    "@picocss/pico": "^1.5.10",
     "@safe-global/protocol-kit": "^1.0.1",
-    "ethers": "5",
-    "node-hid": "^2.1.2"
+    "ethers": "5"
+  },
+  "scripts": {
+    "start": "parcel src/index.html"
   },
   "devDependencies": {
     "@safe-global/safe-core-sdk-types": "^2.0.0",
