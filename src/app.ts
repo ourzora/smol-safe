@@ -1,5 +1,3 @@
-// import { LedgerSigner } from "@anders-t/ethers-ledger";
-// https://github.com/ethers-io/ext-signer/issues/4#issuecomment-918817511
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import Safe, {
   ContractNetworksConfig,
@@ -9,25 +7,31 @@ import Safe, {
 import { ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 
+const defaultL2Addresses = {
+  multiSendAddress: "0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761",
+  safeMasterCopyAddress: "0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+  safeProxyFactoryAddress: "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
+  multiSendCallOnlyAddress: "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D",
+  fallbackHandlerAddress: "0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd",
+  createCallAddress: "0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4",
+  signMessageLibAddress: "0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2",
+};
+
+const baseL2Addresses = {
+  multiSendAddress: "0x998739BFdAAdde7C933B942a68053933098f9EDa",
+  safeMasterCopyAddress: "0x69f4D1788e39c87893C980c06EdF4b7f686e2938",
+  safeProxyFactoryAddress: "0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC",
+  multiSendCallOnlyAddress: "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+  fallbackHandlerAddress: "0x017062a1dE2FE6b99BE3d9d37841FeD19F573804",
+  createCallAddress: "0xB19D6FFc2182150F8Eb585b79D4ABcd7C5640A9d",
+  signMessageLibAddress: "0x98FFBBF51bb33A056B08ddf711f289936AafF717",
+};
+
 const contractNetworks: ContractNetworksConfig = {
-  [999]: {
-    multiSendAddress: "0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761",
-    safeMasterCopyAddress: "0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
-    safeProxyFactoryAddress: "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-    multiSendCallOnlyAddress: "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D",
-    fallbackHandlerAddress: "0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd",
-    createCallAddress: "0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4",
-    signMessageLibAddress: "0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2",
-  },
-  [7777777]: {
-    multiSendAddress: "0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761",
-    safeMasterCopyAddress: "0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
-    safeProxyFactoryAddress: "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
-    multiSendCallOnlyAddress: "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D",
-    fallbackHandlerAddress: "0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd",
-    createCallAddress: "0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4",
-    signMessageLibAddress: "0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2",
-  },
+  [999]: defaultL2Addresses,
+  [7777777]: defaultL2Addresses,
+  [84531]: baseL2Addresses,
+  [8453]: baseL2Addresses,
 };
 
 function log(text) {
@@ -39,15 +43,18 @@ function log(text) {
   log.innerHTML += `<li>${text}</li>`;
 }
 
-async function getSafeSDK(network: string, safeAddress: string) {
+async function getSafeSDK(safeAddress: string) {
   await (window as any).ethereum.enable();
+  // const provider = new StaticJsonRpcProvider(network);
 
-  const provider = new StaticJsonRpcProvider(network);
-  const ledgerSigner = new ethers.providers.Web3Provider(
+  const signer = new ethers.providers.Web3Provider(
     (window as any).ethereum
   ).getSigner();
 
-  const ethAdapter = new EthersAdapter({ ethers, signerOrProvider: provider });
+  const ethAdapter = new EthersAdapter({
+    ethers,
+    signerOrProvider: signer,
+  });
 
   log(`ChainId: ${await ethAdapter.getChainId()}`);
 
@@ -60,15 +67,15 @@ async function getSafeSDK(network: string, safeAddress: string) {
   log("has safe");
 
   const safeSdk2 = await safeSdk.connect({
-    ethAdapter: new EthersAdapter({ ethers, signerOrProvider: ledgerSigner }),
+    ethAdapter: new EthersAdapter({ ethers, signerOrProvider: signer }),
     safeAddress,
     contractNetworks,
   });
-  return { safeSdk, safeSdk2 };
+  return { safeSdk, safeSdk2, signer };
 }
 
-async function runit(network, operation, safeAddress, transaction) {
-  const { safeSdk, safeSdk2 } = await getSafeSDK(network, safeAddress);
+async function runit(operation, safeAddress, transaction) {
+  const { safeSdk, safeSdk2 } = await getSafeSDK(safeAddress);
 
   log("creating txn");
   const txn = await safeSdk.createTransaction({
@@ -92,7 +99,7 @@ async function runit(network, operation, safeAddress, transaction) {
   }
 }
 
-async function create(network: string, threshold: string, signers: string[]) {
+async function create(threshold: string, signers: string[]) {
   const signer = new ethers.providers.Web3Provider(
     (window as any).ethereum
   ).getSigner();
@@ -107,16 +114,60 @@ async function create(network: string, threshold: string, signers: string[]) {
   log(`deployed: ${await sdk.getAddress()}`);
 }
 
+async function getSafeData(safeAddress: string) {
+  const { safeSdk, signer } = await getSafeSDK(safeAddress);
+  const owners = await safeSdk.getOwners();
+  const threshold = await safeSdk.getThreshold();
+  const chainId = await signer.getChainId();
+
+  return { owners, threshold, chainId };
+}
+
+function formDataAsDict(form: HTMLFormElement) {
+  const data = {};
+  const formData = new FormData(form);
+  for (const pair of formData.entries()) {
+    data[pair[0]] = pair[1];
+  }
+  return data;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  (window as any).ethereum.on("chainChanged", (networkId) => {
+    document.querySelector("#network-id")!.innerHTML = networkId;
+  });
+  (window as any).ethereum.on("connect", (connectInfo: any) => {
+    document.querySelector("#network-id")!.innerHTML = parseInt(
+      connectInfo.chainId,
+      16
+    ).toString();
+  });
+});
+
 function app() {
   const signForm = document.querySelector("#sign");
   if (signForm) {
+    document
+      .querySelector("#connect")
+      ?.addEventListener("click", async (evt) => {
+        evt.preventDefault();
+        (window as any).ethereum.send("eth_requestAccounts");
+      });
+    document
+      .querySelector("#safe-info")
+      ?.addEventListener("click", async (evt) => {
+        evt.preventDefault();
+        const data = formDataAsDict(signForm as HTMLFormElement);
+        const safeData = await getSafeData(data["safeAddress"]);
+        document.querySelector("#safe-result")!.innerHTML = JSON.stringify(
+          safeData,
+          null,
+          2
+        );
+      });
     signForm.addEventListener("submit", (evt) => {
       evt.preventDefault();
-      const data = {};
-      const formData = new FormData(signForm as any);
-      for (const pair of formData.entries()) {
-        data[pair[0]] = pair[1];
-      }
+      const data = formDataAsDict(signForm as HTMLFormElement);
       try {
         const txn = {
           to: data["to"],
@@ -124,7 +175,7 @@ function app() {
           data: data["data"] || "0x",
         };
         console.log({ txn });
-        runit(data["network"], data["operation"], data["safeAddress"], txn);
+        runit(data["operation"], data["safeAddress"], txn);
       } catch (e) {
         log(e);
         alert(e.toString());
@@ -136,14 +187,10 @@ function app() {
   if (executeForm) {
     executeForm.addEventListener("submit", (evt) => {
       evt.preventDefault();
-      const data = {};
-      const formData = new FormData(executeForm as any);
-      for (const pair of formData.entries()) {
-        data[pair[0]] = pair[1];
-      }
+      const data = formDataAsDict(executeForm as HTMLFormElement);
       // do execute
       try {
-        create(data["network"], data["threshold"], data["signers"].split("\n"));
+        create(data["threshold"], data["signers"].split("\n"));
       } catch (e) {
         log(e.toString());
         console.error(e);

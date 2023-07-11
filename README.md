@@ -1,0 +1,1 @@
+small front-end for gnosis safe
