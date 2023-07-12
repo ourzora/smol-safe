@@ -8,12 +8,13 @@
     "@ethersproject/wallet": "^5.7.0",
     "@safe-global/protocol-kit": "^1.0.1",
     "@safe-global/safe-deployments": "^1.25.0",
+    "@zoralabs/zorb": "^0.1.0",
     "ethers": "5",
     "toastify-js": "^1.12.0"
   },
   "scripts": {
     "start": "parcel src/index.html",
-    "build": "parcel build src/index.html --public-url .",
+    "build": "rm -rf ./dist && parcel build src/index.html --public-url .",
     "deploy": "yarn build && gh-pages -d dist"
   },
   "devDependencies": {

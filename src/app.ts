@@ -4,8 +4,9 @@ import Safe, {
   SafeFactory,
 } from "@safe-global/protocol-kit";
 import Toastify from "toastify-js";
-import { Signer, ethers } from "ethers";
+import { ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
+import '@zoralabs/zorb/dist/component.umd'
 import "toastify-js/src/toastify.css";
 
 const defaultL2Addresses = {
@@ -44,12 +45,11 @@ function log(text) {
   if (!log) {
     return;
   }
-  log.innerHTML += `<li>${text}</li>`;
+  log.innerHTML += `<li style="font-size: 0.89em">${text}</li>`;
 }
 
 async function getSafeSDK(safeAddress: string) {
   await (window as any).ethereum.enable();
-  // const provider = new StaticJsonRpcProvider(network);
 
   const signer = new ethers.providers.Web3Provider(
     (window as any).ethereum
