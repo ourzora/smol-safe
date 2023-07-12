@@ -81,18 +81,23 @@ async function runit(operation, safeAddress, transaction) {
 }
 
 async function create(threshold: string, signers: string[]) {
-  const signer = new ethers.providers.Web3Provider(
-    (window as any).ethereum
-  ).getSigner();
-  const ethAdapter = new EthersAdapter({ ethers, signerOrProvider: signer });
-  const adapter = await SafeFactory.create({ ethAdapter, contractNetworks });
-  const sdk = await adapter.deploySafe({
-    safeAccountConfig: {
-      owners: signers,
-      threshold: parseInt(threshold, 10),
-    },
-  });
-  log(`deployed new safe: ${await sdk.getAddress()}`);
+  try {
+    const signer = new ethers.providers.Web3Provider(
+      (window as any).ethereum
+    ).getSigner();
+    const ethAdapter = new EthersAdapter({ ethers, signerOrProvider: signer });
+    const adapter = await SafeFactory.create({ ethAdapter, contractNetworks });
+    const sdk = await adapter.deploySafe({
+      safeAccountConfig: {
+        owners: signers,
+        threshold: parseInt(threshold, 10),
+      },
+    });
+    log(`deployed new safe: ${await sdk.getAddress()}`);
+  } catch (err) {
+    log(err.toString());
+    throw err;
+  }
 }
 
 async function getSafeData(safeAddress: string) {
