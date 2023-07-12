@@ -1,11 +1,12 @@
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import Safe, {
   ContractNetworksConfig,
   EthersAdapter,
   SafeFactory,
 } from "@safe-global/protocol-kit";
-import { ethers } from "ethers";
+import Toastify from "toastify-js";
+import { Signer, ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
+import "toastify-js/src/toastify.css";
 
 const defaultL2Addresses = {
   multiSendAddress: "0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761",
@@ -36,6 +37,9 @@ const contractNetworks: ContractNetworksConfig = {
 
 function log(text) {
   console.log(text);
+  Toastify({
+    text: text,
+  }).showToast();
   const log = document.querySelector("#log");
   if (!log) {
     return;
@@ -63,8 +67,6 @@ async function getSafeSDK(safeAddress: string) {
     safeAddress,
     contractNetworks,
   });
-  // const sdk = await safeSdk.connect({ethAdapter: ethAdapter1, safeAddress })
-  log("has safe");
 
   const safeSdk2 = await safeSdk.connect({
     ethAdapter: new EthersAdapter({ ethers, signerOrProvider: signer }),
@@ -75,27 +77,32 @@ async function getSafeSDK(safeAddress: string) {
 }
 
 async function runit(operation, safeAddress, transaction) {
-  const { safeSdk, safeSdk2 } = await getSafeSDK(safeAddress);
+  try {
+    const { safeSdk, safeSdk2 } = await getSafeSDK(safeAddress);
 
-  log("creating txn");
-  const txn = await safeSdk.createTransaction({
-    safeTransactionData: transaction,
-  });
+    log(`creating txn for ${safeAddress.toString()}`);
+    const txn = await safeSdk.createTransaction({
+      safeTransactionData: transaction,
+    });
 
-  if (operation === "execute") {
-    const execute = await safeSdk2.executeTransaction(txn);
-    log(`publishing approval tx ${execute.hash}`);
-    await execute.transactionResponse?.wait();
-    log("executed");
-  }
-  if (operation === "sign") {
-    const txHash = await safeSdk2.getTransactionHash(txn);
-    log(`has safe tx hash ${txHash}`);
+    if (operation === "execute") {
+      const execute = await safeSdk2.executeTransaction(txn);
+      log(`publishing approval tx ${execute.hash}`);
+      await execute.transactionResponse?.wait();
+      log("executed");
+    }
 
-    const approveTxResponse = await safeSdk2.approveTransactionHash(txHash);
-    log(`publishing approval tx ${approveTxResponse.hash}`);
-    await approveTxResponse.transactionResponse?.wait();
-    log("published");
+    if (operation === "sign") {
+      const txHash = await safeSdk2.getTransactionHash(txn);
+      log(`has safe tx hash ${txHash}`);
+
+      const approveTxResponse = await safeSdk2.approveTransactionHash(txHash);
+      log(`publishing approval tx ${approveTxResponse.hash}`);
+      await approveTxResponse.transactionResponse?.wait();
+      log("transaction has been confirmed");
+    }
+  } catch (err) {
+    log(err.toString());
   }
 }
 
@@ -111,16 +118,21 @@ async function create(threshold: string, signers: string[]) {
       threshold: parseInt(threshold, 10),
     },
   });
-  log(`deployed: ${await sdk.getAddress()}`);
+  log(`deployed new safe: ${await sdk.getAddress()}`);
 }
 
 async function getSafeData(safeAddress: string) {
-  const { safeSdk, signer } = await getSafeSDK(safeAddress);
-  const owners = await safeSdk.getOwners();
-  const threshold = await safeSdk.getThreshold();
-  const chainId = await signer.getChainId();
+  try {
+    const { safeSdk, signer } = await getSafeSDK(safeAddress);
+    const owners = await safeSdk.getOwners();
+    const threshold = await safeSdk.getThreshold();
+    const chainId = await signer.getChainId();
 
-  return { owners, threshold, chainId };
+    return { owners, threshold, chainId };
+  } catch (err) {
+    log(err.toString());
+    throw err;
+  }
 }
 
 function formDataAsDict(form: HTMLFormElement) {
@@ -134,13 +146,26 @@ function formDataAsDict(form: HTMLFormElement) {
 
 document.addEventListener("DOMContentLoaded", () => {
   (window as any).ethereum.on("chainChanged", (networkId) => {
-    document.querySelector("#network-id")!.innerHTML = networkId;
-  });
-  (window as any).ethereum.on("connect", (connectInfo: any) => {
     document.querySelector("#network-id")!.innerHTML = parseInt(
-      connectInfo.chainId,
+      networkId,
       16
     ).toString();
+  });
+  (window as any).ethereum.on("accountsChanged", (accounts) => {
+    log(`Switched account to ${accounts[0]}`);
+    document.querySelector<HTMLDivElement>("#user-account")!.innerHTML =
+      accounts[0];
+  });
+  (window as any).ethereum.on("connect", async (connectInfo: any) => {
+    const accounts = await (window as any).ethereum.send("eth_requestAccounts");
+    const firstAccount = accounts.result[0];
+    document.querySelector<HTMLDivElement>("#user-account")!.innerHTML =
+      firstAccount;
+    document.querySelector<HTMLDivElement>("#connect-section")!.style.display =
+      "none";
+    const network = parseInt(connectInfo.chainId, 16).toString();
+    document.querySelector("#network-id")!.innerHTML = network;
+    log(`Switched connected to ${network} with ${firstAccount}`);
   });
 });
 

@@ -16,61 +16,93 @@
   <body>
     <main class="container">
       <form id="sign">
-        <h2>sign a thing // gnosis on-chain and simple</h2>
-        <div>
-          <strong>NETWORK:</strong>
-          <div>CHOOSE METAMASK</div>
-          <button id="connect">coonnect</button>
+        <h2>smol-safe //</h2>
+        <section>
+          <div>
+            <strong>Connected to chainid:</strong>
+            <span id="network-id">none</span>
+          </div>
+          <div><strong>Account: </strong> <span id="user-account"></span></div>
+          <div style="flex: 1" id="connect-section">
+            <div>Connect Metamask/Injected Wallet</div>
+            <button id="connect">Coonnect</button>
+          </div>
+        </section>
+
+        <details>
+          <summary role="button">I have a safe</summary>
 
           <div>
-            <strong>network:</strong>
-            <div id="network-id"></div>
+            <section style="margin-top: 14px">
+              <h4>Load existing safe:</h4>
+              <label>
+                SAFE ADDRESS:
+                <input type="text" name="safeAddress" />
+              </label>
+              <button id="safe-info">Get Safe Info</button>
+              <pre id="safe-result"></pre>
+            </section>
+            <section>
+              <div>
+                <strong>OPERATION:</strong>
+                <label
+                  ><input
+                    type="radio"
+                    style="display: inline-block"
+                    name="operation"
+                    value="sign"
+                  />
+                  SIGN
+                  <small>Sign (but do not execute) on-chain transaction</small>
+                </label>
+                <label
+                  ><input
+                    type="radio"
+                    style="display: inline-block"
+                    name="operation"
+                    value="execute"
+                  />
+                  SIGN & EXECUTE
+                  <small
+                    >Only use when all other signers have signed.</small
+                  ></label
+                >
+              </div>
+              <label>
+                Send value or data to address:
+                <input name="to" />
+              </label>
+              <label>
+                Ethereum (or native token) value to send (in ether, such as
+                0.1):
+                <input name="value" />
+              </label>
+              <label>
+                Data to send in the transaction (blank for none or hex-encoded):
+                <input name="data" />
+              </label>
+              <input type="submit" value="Send safe transaction request" />
+            </section>
           </div>
-        </div>
-        <div>
-          <strong>OPERATION:</strong>
-          <label
-            >SIGN <input type="radio" name="operation" value="sign"
-          /></label>
-          <label
-            >EXECUTE <input type="radio" name="operation" value="execute"
-          /></label>
-        </div>
-        <label>
-          SAFE ADDRESS:
-          <input type="text" name="safeAddress" />
-        </label>
-        <button id="safe-info">Get Safe Info</button>
-        <pre id="safe-result"></pre>
-        <label>
-          TO ADDRESS:
-          <input name="to" />
-        </label>
-        <label>
-          VALUE (in ether, such as 0.1):
-          <input name="value" />
-        </label>
-        <label>
-          DATA (leave blank if not executing a contract):
-          <input name="data" />
-        </label>
-        <input type="submit" />
+        </details>
       </form>
 
-      <form id="create">
-        <h2>create a SAFE on the current MM network</h2>
-        <label>
-          USERS: (one per line)
-          <textarea rows="4" name="signers"></textarea>
-        </label>
-        <label>
-          THRESHOLD:
-          <input name="threshold" type="text" />
-        </label>
-        <input type="submit" />
-      </form>
+      <details>
+        <summary role="button">I am creating a safe</summary>
+        <form id="create">
+          <h4>create a SAFE on the current network</h4>
+          <label>
+            Safe Users: (one per line)
+            <textarea rows="4" name="signers"></textarea>
+          </label>
+          <label>
+            Safe Threshold:
+            <input name="threshold" type="number" min="1" step="1" />
+          </label>
+          <input type="submit" />
+        </form>
+      </details>
 
-      <h5>log</h5>
       <ul id="log"></ul>
     </main>
   </body>
