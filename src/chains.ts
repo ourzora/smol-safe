@@ -19,22 +19,12 @@ const defaultL2Addresses = {
     createCallAddress: "0xB19D6FFc2182150F8Eb585b79D4ABcd7C5640A9d",
     signMessageLibAddress: "0x98FFBBF51bb33A056B08ddf711f289936AafF717",
   };
-
-  const pgnSepoliaAddresses = {
-    multiSendAddress: "0x0Cf8733DEd6d9E0905A8cCc8DC767F381A76970a",
-    safeMasterCopyAddress: "0x96315ee3C58d16A40DA8Ee05008bA1F6654ea358",
-    safeProxyFactoryAddress: "0x11cf5F667dC6AD4dEE58CB07e4AAc6a3fc7E1DCb",
-    multiSendCallOnlyAddress: "0xC5c958a65656A84b74100D1d420a1819fEA18d41",
-    fallbackHandlerAddress: "0xCe6B190956D73dA045bA348743E4C1cb6652f37f",
-    createCallAddress: "0x9B414A3F7872bdd2E6513689214BD2Debbe48340",
-    signMessageLibAddress: "0x3C1ebcF36Ca9DD9371c9aA99c274e4988906c6E3",
-  };
   
   export const contractNetworks: ContractNetworksConfig = {
     [999]: defaultL2Addresses,
     [7777777]: defaultL2Addresses,
     [84531]: baseL2Addresses,
     [8453]: baseL2Addresses,
-    [58008]: pgnSepoliaAddresses,
+    [58008]: defaultL2Addresses,
   };
   
