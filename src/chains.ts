@@ -21,10 +21,16 @@ const baseL2Addresses = {
 };
 
 export const contractNetworks: ContractNetworksConfig = {
+  // ZORA goerli
   [999]: defaultL2Addresses,
+  // ZORA mainnet
   [7777777]: defaultL2Addresses,
+  // base goerli
   [84531]: baseL2Addresses,
+  // base mainnet
   [8453]: baseL2Addresses,
+  // pgn sepolia
   [58008]: defaultL2Addresses,
+  // pgn mainnet
   [424]: defaultL2Addresses,
 };
