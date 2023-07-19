@@ -14,7 +14,8 @@
   },
   "scripts": {
     "start": "parcel src/index.html",
-    "build": "rm -rf ./dist && parcel build src/index.html --public-url .",
+    "clean": "rm -rf ./dist",
+    "build": "yarn clean && parcel build src/index.html --public-url .",
     "deploy": "yarn build && gh-pages -d dist"
   },
   "devDependencies": {
