@@ -20,6 +20,9 @@ const baseL2Addresses = {
   signMessageLibAddress: "0x98FFBBF51bb33A056B08ddf711f289936AafF717",
 };
 
+// sepolia is the same as base.
+const sepoliaAddresses = baseL2Addresses;
+
 export const contractNetworks: ContractNetworksConfig = {
   // ZORA goerli
   [999]: defaultL2Addresses,
@@ -33,4 +36,6 @@ export const contractNetworks: ContractNetworksConfig = {
   [58008]: defaultL2Addresses,
   // pgn mainnet
   [424]: defaultL2Addresses,
+  // sepolia testnet
+  [11155111]: sepoliaAddresses,
 };
