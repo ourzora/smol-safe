@@ -22,12 +22,16 @@ function log(text) {
   log.innerHTML += `<li style="font-size: 0.89em">${text}</li>`;
 }
 
-async function getSafeSDK(safeAddress: string) {
+async function getSigner() {
   await (window as any).ethereum.enable();
 
-  const signer = new ethers.providers.Web3Provider(
+  return new ethers.providers.Web3Provider(
     (window as any).ethereum
   ).getSigner();
+}
+
+async function getSafeSDK(safeAddress: string) {
+  const signer = await getSigner();
 
   const ethAdapter = new EthersAdapter({
     ethers,
@@ -114,6 +118,15 @@ async function getSafeData(safeAddress: string) {
   }
 }
 
+async function getSafeTxnApprovals(safeAddress: string, txnData: any) {
+  const { safeSdk, safeSdk2 } = await getSafeSDK(safeAddress);
+  const txn = await safeSdk.createTransaction({
+    safeTransactionData: txnData,
+  });
+  const hash = await safeSdk2.getTransactionHash(txn);
+  return await safeSdk2.getOwnersWhoApprovedTx(hash);
+}
+
 function formDataAsDict(form: HTMLFormElement) {
   const data = {};
   const formData = new FormData(form);
@@ -148,8 +161,65 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+function setInput(name: string, value: string | null) {
+  if (value === null) {
+    value = "";
+  }
+
+  const safeAddress = document.querySelector(
+    `input[name=${name}]`
+  ) as HTMLInputElement;
+  safeAddress.value = value;
+}
+
+const getNetwork = async () =>
+  (await (await getSigner()).getChainId()).toString();
+
 function app() {
   const signForm = document.querySelector("#sign");
+
+  async function getSafeInfo() {
+    const data = formDataAsDict(signForm as HTMLFormElement);
+    const safeData = await getSafeData(data["safeAddress"]);
+    document.querySelector("#safe-result")!.innerHTML = JSON.stringify(
+      safeData,
+      null,
+      2
+    );
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("network")) {
+      let network = params.get("network")!;
+      if (network.startsWith("0x")) {
+        network = parseInt(network, 16).toString();
+      }
+
+      const currentNetwork = await getNetwork();
+      console.log({ currentNetwork, network });
+      if (currentNetwork !== network) {
+        console.log("changing network");
+        await (window as any).ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: `0x${parseInt(network, 10).toString(16)}` }],
+        });
+      }
+    }
+    if (params.get("safe")) {
+      console.log("has safe!");
+      console.log(params.get("safe"));
+      setInput("safeAddress", params.get("safe"));
+      setInput("to", params.get("to"));
+      setInput("value", params.get("value"));
+      setInput("data", params.get("data"));
+      getSafeInfo();
+      (
+        document.querySelector("summary.have-safe") as any
+      ).parentElement.setAttribute("open", "1");
+    }
+  });
+
   if (signForm) {
     document
       .querySelector("#connect")
@@ -158,16 +228,28 @@ function app() {
         (window as any).ethereum.send("eth_requestAccounts");
       });
     document
+      .querySelector("button.share-txn")
+      ?.addEventListener("click", async (evt) => {
+        evt.preventDefault();
+        const params = new URLSearchParams();
+        const data: any = formDataAsDict(signForm as HTMLFormElement);
+        params.set("safe", data["safeAddress"]);
+        params.set("to", data["to"]);
+        params.set("data", data["data"]);
+        params.set("value", data["value"]);
+        params.set("network", await getNetwork());
+        let location = window.location.href;
+        if (location.indexOf("?") !== -1) {
+          location = location.substring(0, location.indexOf("?"));
+        }
+        const url = `${location}?${params.toString()}`;
+        (navigator as any).clipboard.writeText(url);
+      });
+    document
       .querySelector("#safe-info")
       ?.addEventListener("click", async (evt) => {
         evt.preventDefault();
-        const data = formDataAsDict(signForm as HTMLFormElement);
-        const safeData = await getSafeData(data["safeAddress"]);
-        document.querySelector("#safe-result")!.innerHTML = JSON.stringify(
-          safeData,
-          null,
-          2
-        );
+        getSafeInfo();
       });
     signForm.addEventListener("submit", (evt) => {
       evt.preventDefault();
@@ -184,6 +266,22 @@ function app() {
         log(e);
         alert(e.toString());
         return;
+      }
+    });
+    signForm.addEventListener("change", async () => {
+      const data: any = formDataAsDict(signForm as HTMLFormElement);
+      if (data.safeAddress && data.to && data.value && data.data) {
+        const txn = {
+          to: data["to"],
+          value: parseEther(data["value"] || "0").toString(),
+          data: data["data"] || "0x",
+        };
+        console.log({ txn, data });
+        const approvals = await getSafeTxnApprovals(data["safeAddress"], txn);
+        const approvalsHtml = document.querySelector("#txn-approvals")!;
+        approvalsHtml.innerHTML = `${
+          approvals.length
+        } approvals for this txn [${approvals.join(", ")}]`;
       }
     });
   }
