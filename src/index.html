@@ -38,7 +38,7 @@
         </section>
 
         <details>
-          <summary role="button">I have a safe</summary>
+          <summary class="have-safe" role="button">I have a safe</summary>
 
           <div>
             <section style="margin-top: 14px">
@@ -91,7 +91,9 @@
                 Data to send in the transaction (blank for none or hex-encoded):
                 <input name="data" />
               </label>
+              <label id="txn-approvals"></label>
               <input type="submit" value="Send safe transaction request" />
+              <button class="share-txn">Share txn link</button>
             </section>
           </div>
         </details>
