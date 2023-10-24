@@ -26,6 +26,8 @@ const sepoliaAddresses = baseL2Addresses;
 export const contractNetworks: ContractNetworksConfig = {
   // ZORA goerli
   [999]: defaultL2Addresses,
+  // ZORA sepolia testnet
+  [999999999]: defaultL2Addresses,
   // ZORA mainnet
   [7777777]: defaultL2Addresses,
   // base goerli
