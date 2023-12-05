@@ -67,7 +67,7 @@ export const ViewSafe = () => {
 
   return (
     <SafeDataProvider.Provider value={safeData}>
-      <View paddingTop={8}>
+      <View paddingTop={8} paddingBottom={8}>
         <Text variant="featured-2">View Safe</Text>
         <View paddingTop={4} />
         {safeData ? (

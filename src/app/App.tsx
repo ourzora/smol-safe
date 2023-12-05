@@ -1,11 +1,4 @@
-import { ethers } from "ethers";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useContext } from "react";
 import {
   FormControl,
   Button,
@@ -16,22 +9,21 @@ import {
   Card,
 } from "reshaped";
 import { allowedNetworks } from "../chains";
-import { Web3Provider } from "@ethersproject/providers";
-import { FieldArray, Formik, useFormik } from "formik";
+import { useFormik } from "formik";
 import { isAddress } from "viem";
 import { CurrentNetwork, WalletProviderContext } from "./Root";
 import { useNavigate } from "react-router-dom";
 
-type AddressInputs = {
-  address: string;
-};
+// type AddressInputs = {
+//   address: string;
+// };
 
-function transformFieldChange(props: any) {
-  return {
-    ...props,
-    onChange: ({ event }: any) => props.onChange(event),
-  };
-}
+// function transformFieldChange(props: any) {
+//   return {
+//     ...props,
+//     onChange: ({ event }: any) => props.onChange(event),
+//   };
+// }
 
 function FormAddressInput() {
   const formik = useFormik({
@@ -73,7 +65,6 @@ function FormAddressInput() {
     </form>
   );
 }
-
 
 export function App() {
   const walletProviderContext = useContext(WalletProviderContext);

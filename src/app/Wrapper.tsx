@@ -6,6 +6,7 @@ import { ViewSafe } from "./ViewSafe";
 import { Root } from "./Root";
 import { CreateSafe } from "./CreateSafe";
 import { SafeInformation } from "./SafeInformation";
+import { NewSafeProposal } from "./NewSafeProposal";
 
 const router = createHashRouter([
   {
@@ -29,6 +30,11 @@ const router = createHashRouter([
             path: '/safe/:networkId/:safeAddress',
             index: true,
             Component: SafeInformation,
+          },
+          {
+            path: '/safe/:networkId/:safeAddress/proposal/new',
+            index: true,
+            Component: NewSafeProposal,
           },
         ]
       },
