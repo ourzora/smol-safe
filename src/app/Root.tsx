@@ -3,13 +3,15 @@ import { ethers } from "ethers";
 import { createContext, useCallback, useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Button, View } from "reshaped";
+import { NetworkSwitcher } from "../components/NetworkSwitcher";
 
 export const WalletProviderContext = createContext<null | Web3Provider>(null);
-export const CurrentNetwork = createContext({ chainId: 0 });
+export const CurrentNetwork = createContext(0);
 
 export const Root = () => {
   const [provider, setProvider] = useState<Web3Provider | undefined>();
-  const [currentNetwork, setCurrentNetwork] = useState(0);
+  const [currentNetwork, setCurrentNetwork] = useState<number>(0);
+
   const connectMetamask = useCallback(async () => {
     const provider = new ethers.providers.Web3Provider(
       (window as any).ethereum
@@ -51,6 +53,7 @@ export const Root = () => {
   return (
     <WalletProviderContext.Provider value={provider}>
       <CurrentNetwork.Provider value={currentNetwork}>
+        <NetworkSwitcher {...{ currentNetwork, setCurrentNetwork, provider }} />
         <Outlet />
       </CurrentNetwork.Provider>
     </WalletProviderContext.Provider>

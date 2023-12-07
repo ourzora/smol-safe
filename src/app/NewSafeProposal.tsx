@@ -161,7 +161,7 @@ export const NewSafeProposal = () => {
         text: `Message: ${e.message}`,
       });
     }
-  }, [proposal]);
+  }, [proposal?.actions, proposal?.nonce, provider, safeInformation, toaster]);
 
   const onSubmit = useCallback((result: Proposal) => {
     setProposal(result);
