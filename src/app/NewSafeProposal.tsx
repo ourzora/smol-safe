@@ -1,15 +1,23 @@
 import { Field, FieldArray, Formik } from "formik";
-import { SafeInformation, SafeInformationContext } from "./SafeInformation";
-import { Card, View, Text, Button, useToast } from "reshaped";
+import { SafeInformation } from "./SafeInformation";
+import {
+  Card,
+  View,
+  Text,
+  Button,
+  useToast,
+  TextArea,
+  TextField,
+} from "reshaped";
 import {
   SyntheticEvent,
   useCallback,
   useContext,
-  useMemo,
+  useEffect,
   useState,
 } from "react";
 import { Address, Hex } from "viem";
-import { validateAddress, validateETH } from "../utils/validators";
+import { validateAddress, validateETH, yupAddress } from "../utils/validators";
 import { GenericField } from "../components/GenericField";
 import { useSearchParams } from "react-router-dom";
 import { InferType, array, number, object, string } from "yup";
@@ -19,6 +27,7 @@ import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
 import { WalletProviderContext } from "./Root";
 import { ethers } from "ethers";
 import { contractNetworks } from "../chains";
+import { SafeDataProvider } from "./ViewSafe";
 
 const FormActionItem = ({
   name,
@@ -61,9 +70,7 @@ const proposalSchema = object({
   nonce: number().nullable(),
   actions: array(
     object({
-      to: string()
-        .matches(/^0x[a-fA-F0-9]{40}$/, "Needs to be a valid address")
-        .required(),
+      to: yupAddress,
       value: string()
         .default("0")
         .matches(
@@ -98,18 +105,21 @@ const DEFAULT_PROPOSAL = {
 };
 
 export const NewSafeProposal = () => {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const [proposal, setProposal] = useState<undefined | Proposal>();
   const [isEditing, setIsEditing] = useState(true);
 
-  useMemo(() => {
+  useEffect(() => {
     if (proposal) {
       return;
     }
     const newProposal = params.get("proposal");
     if (newProposal) {
-      setProposal(JSON.parse(newProposal));
-      setIsEditing(false);
+      const newProposalData = JSON.parse(newProposal);
+      if (proposalSchema.validateSync(newProposalData)) {
+        setProposal(newProposalData);
+        setIsEditing(false);
+      }
     } else {
       setProposal(DEFAULT_PROPOSAL);
     }
@@ -125,7 +135,7 @@ export const NewSafeProposal = () => {
 
   const provider = useContext(WalletProviderContext);
   const toaster = useToast();
-  const safeInformation = useContext(SafeInformationContext);
+  const safeData = useContext(SafeDataProvider);
 
   const submitCallback = useCallback(async () => {
     try {
@@ -135,7 +145,7 @@ export const NewSafeProposal = () => {
       });
       const adapter = await Safe.create({
         ethAdapter,
-        safeAddress: safeInformation!.address,
+        safeAddress: await safeData!.safeSdk.getAddress(),
         contractNetworks,
       });
       if (!proposal?.actions) {
@@ -150,10 +160,10 @@ export const NewSafeProposal = () => {
       });
       const executedTxn = await adapter.executeTransaction(txn);
       const response = await executedTxn.transactionResponse?.wait();
-      console.log({ response });
 
       toaster.show({
-        title: "Approved TXN Hash",
+        title: "Approved Txn Hash",
+        text: `Approved with hash: ${executedTxn.hash}`,
       });
     } catch (e: any) {
       toaster.show({
@@ -161,111 +171,121 @@ export const NewSafeProposal = () => {
         text: `Message: ${e.message}`,
       });
     }
-  }, [proposal]);
+  }, [proposal, safeData, provider]);
 
   const onSubmit = useCallback((result: Proposal) => {
     setProposal(result);
+    setParams({ proposal: JSON.stringify(result) });
     setIsEditing(false);
   }, []);
   const defaultActions = proposal || DEFAULT_PROPOSAL;
 
   return (
     <View paddingTop={4} paddingBottom={8} gap={8}>
-      <SafeInformation />
-      {isEditing ? (
-        <Card>
-          <Formik
-            validationSchema={proposalSchema}
-            initialValues={defaultActions}
-            onSubmit={onSubmit}
-          >
-            {({ handleSubmit, values, isValid }) => (
-              <form onSubmit={handleSubmit}>
-                <View gap={4}>
-                  <View.Item>
-                    <Text variant="featured-2">New Proposal Details</Text>
-                  </View.Item>
-                  <View.Item>
-                    <Field name="nonce">
-                      {GenericField({
-                        label: "Nonce (optional)",
-                        fieldProps: { type: "number" },
-                      })}
-                    </Field>
-                  </View.Item>
-                  <FieldArray name="actions">
-                    {(actions) => (
+      <SafeInformation>
+        {isEditing ? (
+          <Card>
+            <Formik
+              validationSchema={proposalSchema}
+              initialValues={defaultActions}
+              onSubmit={onSubmit}
+            >
+              {({ handleSubmit, values, isValid }) => (
+                <form onSubmit={handleSubmit}>
+                  <View gap={4}>
+                    <View.Item>
+                      <Text variant="featured-2">New Proposal Details</Text>
+                    </View.Item>
+                    <View.Item>
+                      <Field name="nonce">
+                        {GenericField({
+                          label: "Nonce (optional)",
+                          fieldProps: { type: "number" },
+                        })}
+                      </Field>
+                    </View.Item>
+                    <FieldArray name="actions">
+                      {(actions) => (
+                        <>
+                          {values.actions?.map((_, indx) => (
+                            <FormActionItem
+                              remove={actions.remove}
+                              indx={indx}
+                              name={`actions.${indx}`}
+                            />
+                          ))}
+                          <View direction="row" justify="space-between">
+                            <View> </View>
+                            <Button
+                              onClick={actions.handlePush(DEFAULT_ACTION_ITEM)}
+                            >
+                              Add
+                            </Button>
+                          </View>
+                        </>
+                      )}
+                    </FieldArray>
+                    <View.Item>
+                      <Button disabled={!isValid} type="submit">
+                        Done
+                      </Button>
+                    </View.Item>
+                  </View>
+                </form>
+              )}
+            </Formik>
+          </Card>
+        ) : (
+          <>
+            {proposal && (
+              <View>
+                <View.Item>Nonce: {proposal.nonce}</View.Item>
+                {proposal.actions?.map((action, indx: number) => (
+                  <>
+                    <View.Item>Proposal #{indx}</View.Item>
+                    <View.Item>
+                      To: <AddressView address={action.to as Address} />
+                    </View.Item>
+                    <View.Item>
+                      Value:
+                      <TextField name="value" value={action.value} />
+                    </View.Item>
+                    {action.data ? (
                       <>
-                        {values.actions?.map((_, indx) => (
-                          <FormActionItem
-                            remove={actions.remove}
-                            indx={indx}
-                            name={`actions.${indx}`}
-                          />
-                        ))}
-                        <View direction="row" justify="space-between">
-                          <View> </View>
-                          <Button
-                            onClick={actions.handlePush(DEFAULT_ACTION_ITEM)}
-                          >
-                            Add
-                          </Button>
-                        </View>
+                        <View.Item>
+                          Data:
+                          <TextArea
+                            inputAttributes={{ readOnly: true }}
+                            name="data"
+                            value={action.data}
+                          ></TextArea>
+                        </View.Item>
+                        <View.Item>
+                          Data Actions:{" "}
+                          <pre>
+                            <DataActionPreview
+                              data={action.data as Hex}
+                              to={action.to as Address}
+                            />
+                          </pre>
+                        </View.Item>
                       </>
+                    ) : (
+                      <View.Item>No data</View.Item>
                     )}
-                  </FieldArray>
-                  <View.Item>
-                    <Button disabled={!isValid} type="submit">
-                      Done
-                    </Button>
-                  </View.Item>
-                </View>
-              </form>
+                    <View.Item>
+                      <View gap={4} direction="row">
+                        <Button onClick={submitCallback}>Submit</Button>
+                        <Button onClick={setEdit}>Edit</Button>
+                      </View>
+                    </View.Item>
+                  </>
+                ))}
+              </View>
             )}
-          </Formik>
-        </Card>
-      ) : (
-        <>
-          {proposal && (
-            <View>
-              <View.Item>Nonce: {proposal.nonce}</View.Item>
-              {proposal.actions?.map((action, indx: number) => (
-                <>
-                  <View.Item>Proposal #{indx}</View.Item>
-                  <View.Item>
-                    To: <AddressView address={action.to as Address} />
-                  </View.Item>
-                  <View.Item>
-                    Value: <pre>{action.value}</pre>
-                  </View.Item>
-                  {action.data ? (
-                    <>
-                      <View.Item>
-                        Data: <pre>{action.data}</pre>
-                      </View.Item>
-                      <View.Item>
-                        Data Actions:{" "}
-                        <pre>
-                          <DataActionPreview
-                            data={action.data as Hex}
-                            to={action.to as Address}
-                          />
-                        </pre>
-                      </View.Item>
-                    </>
-                  ) : (
-                    <View.Item>No data</View.Item>
-                  )}
-                  <View.Item>
-                    <Button onClick={submitCallback}>Submit</Button>
-                    <Button onClick={setEdit}>Edit</Button>
-                  </View.Item>
-                </>
-              ))}
-            </View>
-          )}
-        </>
-      )}
+          </>
+        )}
+      </SafeInformation>
     </View>
   );
 };
