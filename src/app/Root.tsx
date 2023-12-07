@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 import { Button, View } from "reshaped";
 
 export const WalletProviderContext = createContext<null | Web3Provider>(null);
-export const CurrentNetwork = createContext<number>(0);
+export const CurrentNetwork = createContext({ chainId: 0 });
 
 export const Root = () => {
   const [provider, setProvider] = useState<Web3Provider | undefined>();
@@ -38,7 +38,7 @@ export const Root = () => {
   }, [setProvider, setCurrentNetwork]);
   useEffect(() => {
     connectMetamask();
-  }, []);
+  }, [connectMetamask]);
 
   if (!provider) {
     return (

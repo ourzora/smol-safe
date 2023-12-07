@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   FormControl,
   Button,
@@ -77,6 +77,8 @@ export function App() {
         chainId: `0x${parseInt(value).toString(16)}`,
       },
     ]);
+
+    currentNetwork.chainId = parseInt(value);
   };
 
   return (
@@ -87,12 +89,12 @@ export function App() {
             <FormControl.Label>Network:</FormControl.Label>
             <Select
               name="network"
-              value={currentNetwork.toString()}
+              value={currentNetwork.chainId.toString()}
               onChange={changeNetwork}
               options={Object.values(allowedNetworks)
                 .filter((d) => !!d)
-                .map((allowedNetwork: any) => ({
-                  value: allowedNetwork.id,
+                .map((allowedNetwork) => ({
+                  value: allowedNetwork.id.toString(),
                   label: allowedNetwork.name,
                 }))}
             ></Select>
