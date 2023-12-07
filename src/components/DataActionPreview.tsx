@@ -26,10 +26,20 @@ export const DataActionPreview = ({ to, data }: { to: Address; data: Hex }) => {
   const [responseData, setResponseData] = useState<any>();
 
   const fetchData = useCallback(async () => {
-    const response = await fetch(
-      `https://${networkToEtherActor[currentNetwork]}.ether.actor/decode/${to}/${data}`
-    );
-    const json = await response.json();
+    let json;
+    try {
+      const response = await fetch(
+        `https://${networkToEtherActor[currentNetwork]}.ether.actor/decode/${to}/${data}`
+      );
+      if (!response.ok) {
+        throw new Error();
+      }
+      json = await response.json();
+    } catch (err: any) {
+
+      const response = await fetch(`https://ether.actor/decode/${data}`);
+      json = await response.json();
+    }
     setResponseData(json);
   }, [to, data, setResponseData]);
 
