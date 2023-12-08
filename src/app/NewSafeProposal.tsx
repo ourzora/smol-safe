@@ -51,12 +51,6 @@ const FormActionItem = ({
   );
 };
 
-type ActionItem = {
-  to: Address;
-  value: string;
-  data: Hex;
-};
-
 const proposalSchema = object({
   nonce: number().nullable(),
   actions: array(

@@ -10,15 +10,15 @@ import { OwnerAction, SetOwnerModal } from "../components/SetOwnerModal";
 export const SafeInformation = ({
   children,
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) => {
   const [ownerAction, setOwnerAction] = useState<OwnerAction>();
 
   const safeInformation = useContext(SafeInformationContext);
 
-  if (!safeInformation) return null;
+  if (!safeInformation) return <div></div>;
   return (
-    <>
+    <div>
       {ownerAction && (
         <SetOwnerModal
           onClose={() => {
@@ -93,6 +93,6 @@ export const SafeInformation = ({
         </View>
       </Card>
       {children}
-    </>
+    </div>
   );
 };
