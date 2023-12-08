@@ -1,14 +1,6 @@
 import { Field, FieldArray, Formik } from "formik";
-import { SafeInformation, SafeInformationContext } from "./SafeInformation";
-import {
-  Card,
-  View,
-  Text,
-  Button,
-  useToast,
-  TextArea,
-  TextField,
-} from "reshaped";
+import { SafeInformation } from "./SafeInformation";
+import { Card, View, Text, Button, useToast } from "reshaped";
 import {
   SyntheticEvent,
   useCallback,
@@ -21,13 +13,12 @@ import { validateAddress, validateETH, yupAddress } from "../utils/validators";
 import { GenericField } from "../components/GenericField";
 import { useSearchParams } from "react-router-dom";
 import { InferType, array, number, object, string } from "yup";
-import { AddressView } from "../components/AddressView";
 import { DataActionPreview } from "../components/DataActionPreview";
 import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
 import { WalletProviderContext } from "./Root";
 import { ethers } from "ethers";
 import { contractNetworks } from "../chains";
-import { SafeDataProvider } from "./ViewSafe";
+import { SafeInformationContext } from "./ViewSafe";
 
 const FormActionItem = ({
   name,
@@ -159,9 +150,7 @@ const signTx = async ({
   // const response = await executedTxn.transactionResponse?.wait();
   const txHash = await safe.getTransactionHash(txn);
   const executedTxn = await safe.approveTransactionHash(txHash);
-  const response = await executedTxn.transactionResponse?.wait();
-
-  console.log({ response });
+  /*const response = */ await executedTxn.transactionResponse?.wait();
 
   return executedTxn;
 };
@@ -181,9 +170,7 @@ const signAndExecuteTx = async ({
     throw new Error("No txn");
   }
   const executedTxn = await safe.executeTransaction(txn);
-  const response = await executedTxn.transactionResponse?.wait();
-
-  console.log({ response });
+  /*const response = */ await executedTxn.transactionResponse?.wait();
 
   return executedTxn;
 };
@@ -198,6 +185,7 @@ const useSafe = ({
   const [safe, setSafe] = useState<Safe>();
 
   useEffect(() => {
+    console.log({ provider, safeAddress });
     if (!provider || !safeAddress) {
       return;
     }
@@ -213,29 +201,60 @@ const useSafe = ({
   return safe;
 };
 
-export const NewSafeProposal = () => {
-  const [params, setParams] = useSearchParams();
+const useLoadProposalFromQuery = () => {
   const [proposal, setProposal] = useState<undefined | Proposal>();
+  const [params] = useSearchParams();
+
+  useEffect(() => {
+    const targets = params.get("targets")?.split("|");
+    const calldatas = params.get("calldatas")?.split("|");
+    const values = params.get("values")?.split("|");
+    console.log(params.get("targets"));
+    console.log(params.get("calldatas"));
+    if (targets && calldatas) {
+      // ensure the 3 lengths are the same.  check if values also has the same length if its not empty
+      // check the inverse of the above, if inverse is true, return:
+      if (
+        targets.length !== calldatas.length ||
+        (values?.length && values?.length !== targets.length)
+      ) {
+        console.log("invalid lengths");
+        return;
+      }
+
+      const actions = targets.map((target, index) => ({
+        to: target,
+        data: calldatas[index]!,
+        value: (values && values[index]) || "0",
+      }));
+      setProposal({ actions });
+    }
+  }, [params, setProposal]);
+
+  return proposal;
+};
+
+export const NewSafeProposal = () => {
+  const [proposal, setProposal] = useState<undefined | Proposal>(
+    DEFAULT_PROPOSAL
+  );
   const [isEditing, setIsEditing] = useState(true);
+
+  const proposalFromQuery = useLoadProposalFromQuery();
+  useEffect(() => {
+    if (proposalFromQuery) {
+      setProposal(proposalFromQuery);
+      setIsEditing(false);
+    }
+  }, [proposalFromQuery]);
+
+  const safeAddress = useContext(SafeInformationContext)?.address;
   const safe = useSafe({
     provider: useContext(WalletProviderContext),
-    safeAddress: useContext(SafeInformationContext)?.address,
+    safeAddress,
   });
-  useEffect(() => {
-    if (proposal) {
-      return;
-    }
-    const newProposal = params.get("proposal");
-    if (newProposal) {
-      const newProposalData = JSON.parse(newProposal);
-      if (proposalSchema.validateSync(newProposalData)) {
-        setProposal(newProposalData);
-        setIsEditing(false);
-      }
-    } else {
-      setProposal(DEFAULT_PROPOSAL);
-    }
-  }, [params, proposal, setProposal, setIsEditing]);
+
+  console.log({ safeAddress });
 
   const setEdit = useCallback(
     (evt: SyntheticEvent) => {
@@ -289,9 +308,10 @@ export const NewSafeProposal = () => {
 
   const onSubmit = useCallback((result: Proposal) => {
     setProposal(result);
-    setParams({ proposal: JSON.stringify(result) });
+    // setParams({ proposal: JSON.stringify(result) });
     setIsEditing(false);
   }, []);
+
   const defaultActions = proposal || DEFAULT_PROPOSAL;
 
   return (
@@ -357,23 +377,11 @@ export const NewSafeProposal = () => {
                 {proposal.actions?.map((action, indx: number) => (
                   <>
                     <View.Item>Proposal #{indx}</View.Item>
-                    <View.Item>
-                      To: <AddressView address={action.to as Address} />
-                    </View.Item>
-                    <View.Item>
-                      Value:
-                      <TextField name="value" value={action.value} />
-                    </View.Item>
+                    <View.Item>To: {action.to as Address}</View.Item>
+                    <View.Item>Value: {action.value}</View.Item>
                     {action.data ? (
                       <>
-                        <View.Item>
-                          Data:
-                          <TextArea
-                            inputAttributes={{ readOnly: true }}
-                            name="data"
-                            value={action.data}
-                          ></TextArea>
-                        </View.Item>
+                        <View.Item>Data: {action.data}</View.Item>
                         <View.Item>
                           Data Actions:{" "}
                           <pre>
