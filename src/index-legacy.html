@@ -33,7 +33,7 @@
           <div><strong>Account: </strong> <span id="user-account"></span></div>
           <div style="flex: 1" id="connect-section">
             <div>Connect Metamask/Injected Wallet</div>
-            <button id="connect">Coonnect</button>
+            <button id="connect">Connect</button>
           </div>
         </section>
 
@@ -78,22 +78,27 @@
                   ></label
                 >
               </div>
-              <label>
-                Transaction to / recipient address:
-                <input name="to" />
-              </label>
-              <label>
-                Ethereum (or native token) value to send (in ether, such as
-                0.1):
-                <input name="value" />
-              </label>
-              <label>
-                Data to send in the transaction (blank for none or hex-encoded):
-                <input name="data" />
-              </label>
-              <label id="txn-approvals"></label>
-              <input type="submit" value="Send safe transaction request" />
-              <button class="share-txn">Share txn link</button>
+              <fieldset>
+                <legend>operations 1:</legend>
+                <label>
+                  Transaction to / recipient address:
+                  <input name="operations[0].to" />
+                </label>
+                <label>
+                  Ethereum (or native token) value to send (in ether, such as
+                  0.1):
+                  <input name="operations[0].value" />
+                </label>
+                <label>
+                  Data to send in the transaction (blank for none or
+                  hex-encoded):
+                  <input name="operations[0].data" />
+                </label>
+                <label id="txn-approvals"></label>
+                <input type="submit" value="Send safe transaction request" />
+                <button class="share-txn">Share txn link</button>
+              </fieldset>
+              <button>Add operation</button>
             </section>
           </div>
         </details>

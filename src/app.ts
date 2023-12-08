@@ -10,7 +10,7 @@ import "@zoralabs/zorb/dist/component.umd";
 import "toastify-js/src/toastify.css";
 import { contractNetworks } from "./chains";
 
-function log(text) {
+function log(text: string) {
   console.log(text);
   Toastify({
     text: text,

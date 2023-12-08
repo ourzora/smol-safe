@@ -1,4 +1,5 @@
 import { ContractNetworksConfig } from "@safe-global/protocol-kit";
+import * as chains from "viem/chains";
 
 const defaultL2Addresses = {
   multiSendAddress: "0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761",
@@ -41,3 +42,48 @@ export const contractNetworks: ContractNetworksConfig = {
   // sepolia testnet
   [11155111]: sepoliaAddresses,
 };
+
+const pgn = {
+  id: 424 as const,
+  name: 'PGN',
+  network: 'pgn',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.publicgoods.network'],
+      webSocket: ['wss://rpc.publicgoods.network'],
+    },
+    public: {
+      http: ['https://rpc.publicgoods.network'],
+      webSocket: ['wss://rpc.publicgoods.network'],
+    },
+  },
+  blockExplorers: {
+    etherscan: { name: 'Explorer', url: 'https://explorer.publicgoods.network' },
+    default: { name: 'Explorer', url: 'https://explorer.publicgoods.network' },
+  },
+}
+
+export const allowedNetworks: { [chainId: number]: chains.Chain }= {
+  [999]: chains.zoraTestnet,
+  [999999999]: chains.zoraSepolia,
+  [424]: pgn,
+};
+
+Object.keys(contractNetworks).map((network) => {
+  if (allowedNetworks[+network]) {
+    // if already exists skip
+    return;
+  }
+  const viemChain = Object.values(chains).find((chain) => 
+    chain.id.toString() === network  );
+
+  if (!viemChain) {
+    return;
+  }
+  allowedNetworks[+network] = viemChain;
+});
