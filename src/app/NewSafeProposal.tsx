@@ -234,35 +234,17 @@ const useLoadProposalFromQuery = () => {
   return proposal;
 };
 
-export const NewSafeProposal = () => {
-  const [proposal, setProposal] = useState<undefined | Proposal>(
-    DEFAULT_PROPOSAL
-  );
-  const [isEditing, setIsEditing] = useState(true);
-
-  const proposalFromQuery = useLoadProposalFromQuery();
-  useEffect(() => {
-    if (proposalFromQuery) {
-      setProposal(proposalFromQuery);
-      setIsEditing(false);
-    }
-  }, [proposalFromQuery]);
-
-  const safeAddress = useContext(SafeInformationContext)?.address;
+const ViewProposal = ({
+  handleEditClicked,
+  proposal,
+}: {
+  proposal: Proposal;
+  handleEditClicked: (evt: SyntheticEvent) => void;
+}) => {
   const safe = useSafe({
     provider: useContext(WalletProviderContext),
-    safeAddress,
+    safeAddress: useContext(SafeInformationContext)?.address,
   });
-
-  console.log({ safeAddress });
-
-  const setEdit = useCallback(
-    (evt: SyntheticEvent) => {
-      setIsEditing(true);
-      evt.preventDefault();
-    },
-    [setIsEditing]
-  );
 
   const toaster = useToast();
 
@@ -305,110 +287,154 @@ export const NewSafeProposal = () => {
       });
     }
   }, [proposal, safe, toaster]);
+  return (
+    <View>
+      <View.Item>Nonce: {proposal.nonce}</View.Item>
+      {proposal.actions?.map((action, indx: number) => (
+        <>
+          <View.Item>Proposal #{indx}</View.Item>
+          <View.Item>To: {action.to as Address}</View.Item>
+          <View.Item>Value: {action.value}</View.Item>
+          {action.data ? (
+            <>
+              <View.Item>Data: {action.data}</View.Item>
+              <View.Item>
+                Data Actions:{" "}
+                <pre>
+                  <DataActionPreview
+                    data={action.data as Hex}
+                    to={action.to as Address}
+                  />
+                </pre>
+              </View.Item>
+            </>
+          ) : (
+            <View.Item>No data</View.Item>
+          )}
+        </>
+      ))}
+      <View.Item>
+        <View gap={4} direction="row">
+          <Button onClick={handleEditClicked}>Edit</Button>
+          <Button onClick={signCallback}>Sign</Button>
+          <Button onClick={signAndExecuteCallback}>Sign and Execute</Button>
+        </View>
+      </View.Item>
+    </View>
+  );
+};
 
-  const onSubmit = useCallback((result: Proposal) => {
-    setProposal(result);
-    // setParams({ proposal: JSON.stringify(result) });
-    setIsEditing(false);
-  }, []);
+const EditProposal = ({
+  proposal,
+  setProposal: setProposal,
+  setIsEditing,
+}: {
+  proposal: Proposal | undefined;
+  setProposal: (result: Proposal) => void;
+  setIsEditing: (editing: boolean) => void;
+}) => {
+  const onSubmit = useCallback(
+    (result: Proposal) => {
+      setProposal(result);
+      // setParams({ proposal: JSON.stringify(result) });
+      setIsEditing(false);
+    },
+    [setIsEditing, setProposal]
+  );
 
   const defaultActions = proposal || DEFAULT_PROPOSAL;
 
   return (
+    <Card>
+      <Formik
+        validationSchema={proposalSchema}
+        initialValues={defaultActions}
+        onSubmit={onSubmit}
+      >
+        {({ handleSubmit, values, isValid }) => (
+          <form onSubmit={handleSubmit}>
+            <View gap={4}>
+              <View.Item>
+                <Text variant="featured-2">New Proposal Details</Text>
+              </View.Item>
+              <View.Item>
+                <Field name="nonce">
+                  {GenericField({
+                    label: "Nonce (optional)",
+                    fieldProps: { type: "number" },
+                  })}
+                </Field>
+              </View.Item>
+              <FieldArray name="actions">
+                {(actions) => (
+                  <>
+                    {values.actions?.map((_, indx) => (
+                      <FormActionItem
+                        remove={actions.remove}
+                        indx={indx}
+                        name={`actions.${indx}`}
+                      />
+                    ))}
+                    <View direction="row" justify="space-between">
+                      <View> </View>
+                      <Button onClick={actions.handlePush(DEFAULT_ACTION_ITEM)}>
+                        Add
+                      </Button>
+                    </View>
+                  </>
+                )}
+              </FieldArray>
+              <View.Item>
+                <Button disabled={!isValid} type="submit">
+                  Done
+                </Button>
+              </View.Item>
+            </View>
+          </form>
+        )}
+      </Formik>
+    </Card>
+  );
+};
+
+export const NewSafeProposal = () => {
+  const [proposal, setProposal] = useState<undefined | Proposal>(
+    DEFAULT_PROPOSAL
+  );
+  const [isEditing, setIsEditing] = useState(true);
+
+  const proposalFromQuery = useLoadProposalFromQuery();
+
+  useEffect(() => {
+    if (proposalFromQuery) {
+      setProposal(proposalFromQuery);
+      setIsEditing(false);
+    }
+  }, [proposalFromQuery]);
+
+  const handleEditClicked = useCallback(
+    (evt: SyntheticEvent) => {
+      setIsEditing(true);
+      evt.preventDefault();
+    },
+    [setIsEditing]
+  );
+
+  return (
     <View paddingTop={4} paddingBottom={8} gap={8}>
       <SafeInformation>
-        {isEditing ? (
-          <Card>
-            <Formik
-              validationSchema={proposalSchema}
-              initialValues={defaultActions}
-              onSubmit={onSubmit}
-            >
-              {({ handleSubmit, values, isValid }) => (
-                <form onSubmit={handleSubmit}>
-                  <View gap={4}>
-                    <View.Item>
-                      <Text variant="featured-2">New Proposal Details</Text>
-                    </View.Item>
-                    <View.Item>
-                      <Field name="nonce">
-                        {GenericField({
-                          label: "Nonce (optional)",
-                          fieldProps: { type: "number" },
-                        })}
-                      </Field>
-                    </View.Item>
-                    <FieldArray name="actions">
-                      {(actions) => (
-                        <>
-                          {values.actions?.map((_, indx) => (
-                            <FormActionItem
-                              remove={actions.remove}
-                              indx={indx}
-                              name={`actions.${indx}`}
-                            />
-                          ))}
-                          <View direction="row" justify="space-between">
-                            <View> </View>
-                            <Button
-                              onClick={actions.handlePush(DEFAULT_ACTION_ITEM)}
-                            >
-                              Add
-                            </Button>
-                          </View>
-                        </>
-                      )}
-                    </FieldArray>
-                    <View.Item>
-                      <Button disabled={!isValid} type="submit">
-                        Done
-                      </Button>
-                    </View.Item>
-                  </View>
-                </form>
-              )}
-            </Formik>
-          </Card>
-        ) : (
-          <>
-            {proposal && (
-              <View>
-                <View.Item>Nonce: {proposal.nonce}</View.Item>
-                {proposal.actions?.map((action, indx: number) => (
-                  <>
-                    <View.Item>Proposal #{indx}</View.Item>
-                    <View.Item>To: {action.to as Address}</View.Item>
-                    <View.Item>Value: {action.value}</View.Item>
-                    {action.data ? (
-                      <>
-                        <View.Item>Data: {action.data}</View.Item>
-                        <View.Item>
-                          Data Actions:{" "}
-                          <pre>
-                            <DataActionPreview
-                              data={action.data as Hex}
-                              to={action.to as Address}
-                            />
-                          </pre>
-                        </View.Item>
-                      </>
-                    ) : (
-                      <View.Item>No data</View.Item>
-                    )}
-                  </>
-                ))}
-                <View.Item>
-                  <View gap={4} direction="row">
-                    <Button onClick={setEdit}>Edit</Button>
-                    <Button onClick={signCallback}>Sign</Button>
-                    <Button onClick={signAndExecuteCallback}>
-                      Sign and Execute
-                    </Button>
-                  </View>
-                </View.Item>
-              </View>
-            )}
-          </>
+        {isEditing && (
+          <EditProposal
+            proposal={proposal}
+            setProposal={setProposal}
+            setIsEditing={setIsEditing}
+          />
+        )}
+        {!isEditing && proposal && (
+          <ViewProposal
+            proposal={proposal}
+            handleEditClicked={handleEditClicked}
+          />
         )}
       </SafeInformation>
     </View>
