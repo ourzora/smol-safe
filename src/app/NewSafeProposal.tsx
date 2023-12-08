@@ -234,6 +234,37 @@ const useLoadProposalFromQuery = () => {
   return proposal;
 };
 
+const useGetSafeTxApprovals = ({ proposal }: { proposal: Proposal }) => {
+  const safeInformation = useContext(SafeInformationContext);
+
+  const safeSdk = safeInformation?.safeSdk;
+  const safeSdk2 = safeInformation?.safeSdk2;
+
+  const [approvers, setApprovers] = useState<Address[]>([]);
+
+  const loadApprovers = useCallback(async () => {
+    if (!safeSdk || !safeSdk2) return;
+    // const { safeSdk, safeSdk2 } = await getSafeSDK(safeAddress);
+    const txn = await createSafeTransaction({
+      proposal,
+      safe: safeSdk,
+    });
+
+    if (!txn) return;
+
+    const txHash = await safeSdk.getTransactionHash(txn);
+    const ownersWhoApprovedTx = await safeSdk2.getOwnersWhoApprovedTx(txHash);
+
+    setApprovers(ownersWhoApprovedTx as Address[]);
+  }, [proposal, safeSdk, safeSdk2]);
+
+  useEffect(() => {
+    loadApprovers();
+  }, [loadApprovers]);
+
+  return { approvers, loadApprovers };
+};
+
 const ViewProposal = ({
   handleEditClicked,
   proposal,
@@ -248,6 +279,8 @@ const ViewProposal = ({
 
   const toaster = useToast();
 
+  const { approvers, loadApprovers } = useGetSafeTxApprovals({ proposal });
+
   const signCallback = useCallback(async () => {
     if (!safe) return;
     try {
@@ -260,13 +293,14 @@ const ViewProposal = ({
         title: "Approved Txn Hash",
         text: `Approved with hash: ${executedTxn.hash}`,
       });
+      loadApprovers();
     } catch (e: any) {
       toaster.show({
         title: "Error creating safe",
         text: `Message: ${e.message}`,
       });
     }
-  }, [proposal, safe, toaster]);
+  }, [proposal, safe, toaster, loadApprovers]);
 
   const signAndExecuteCallback = useCallback(async () => {
     if (!safe) return;
@@ -280,13 +314,16 @@ const ViewProposal = ({
         title: "Executed Txn Hash",
         text: `Executed with hash: ${executedTxn.hash}`,
       });
+
+      loadApprovers();
     } catch (e: any) {
       toaster.show({
         title: "Error creating safe",
         text: `Message: ${e.message}`,
       });
     }
-  }, [proposal, safe, toaster]);
+  }, [proposal, safe, toaster, loadApprovers]);
+
   return (
     <View>
       <View.Item>Nonce: {proposal.nonce}</View.Item>
@@ -313,6 +350,7 @@ const ViewProposal = ({
           )}
         </>
       ))}
+      <View.Item>Approvers: {approvers.join(",")}</View.Item>
       <View.Item>
         <View gap={4} direction="row">
           <Button onClick={handleEditClicked}>Edit</Button>

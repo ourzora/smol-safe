@@ -42,6 +42,7 @@ type SafeInformationType = {
   nonce: number;
   address: Address;
   safeSdk: Safe;
+  safeSdk2: Safe;
 };
 
 export const SafeInformationContext = createContext<
@@ -59,7 +60,7 @@ const useLoadSafeInformation = ({
     if (!safeData) return;
 
     const loadSafeInfo = async () => {
-      const { safeSdk } = safeData;
+      const { safeSdk, safeSdk2 } = safeData;
       const owners = await safeSdk.getOwners();
       const threshold = await safeSdk.getThreshold();
       const chainId = await safeSdk.getChainId();
@@ -73,6 +74,7 @@ const useLoadSafeInformation = ({
         nonce,
         address,
         safeSdk,
+        safeSdk2,
       });
     };
 
