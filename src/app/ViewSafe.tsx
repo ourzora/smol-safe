@@ -88,22 +88,18 @@ export const ViewSafe = () => {
   const params = useParams();
   const [safeData, setSafeData] = useState<SafeData>();
   const providerContext = useContext(WalletProviderContext);
-  const currentNetwork = useContext(CurrentNetwork);
+  // const currentNetwork = useContext(CurrentNetwork);
 
   const setupSafe = useCallback(async () => {
-    if (currentNetwork.toString() !== params.networkId) {
-      return;
-    }
     if (params.safeAddress && providerContext) {
       setSafeData(
         await getSafeSDK(params.safeAddress, providerContext.getSigner())
       );
     }
-  }, [currentNetwork, params.networkId, params.safeAddress, providerContext]);
+  }, [params.safeAddress, providerContext]);
 
   const switchNetwork = useCallback(() => {
     if (!params.networkId) return;
-    console.log("network", params.networkId);
     providerContext?.send("wallet_switchEthereumChain", [
       {
         chainId: `0x${parseInt(params.networkId!).toString(16)}`,

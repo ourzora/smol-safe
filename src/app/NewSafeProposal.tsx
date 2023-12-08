@@ -185,7 +185,6 @@ const useSafe = ({
   const [safe, setSafe] = useState<Safe>();
 
   useEffect(() => {
-    console.log({ provider, safeAddress });
     if (!provider || !safeAddress) {
       return;
     }
@@ -209,8 +208,6 @@ const useLoadProposalFromQuery = () => {
     const targets = params.get("targets")?.split("|");
     const calldatas = params.get("calldatas")?.split("|");
     const values = params.get("values")?.split("|");
-    console.log(params.get("targets"));
-    console.log(params.get("calldatas"));
     if (targets && calldatas) {
       // ensure the 3 lengths are the same.  check if values also has the same length if its not empty
       // check the inverse of the above, if inverse is true, return:
@@ -265,6 +262,49 @@ const useGetSafeTxApprovals = ({ proposal }: { proposal: Proposal }) => {
   return { approvers, loadApprovers };
 };
 
+const useAccountAddress = () => {
+  const walletProvider = useContext(WalletProviderContext);
+
+  const [address, setAddress] = useState<Address>();
+
+  useEffect(() => {
+    if (!walletProvider) return;
+
+    (async () => {
+      setAddress(
+        (await walletProvider.getSigner().getAddress()) as Address | undefined
+      );
+    })();
+  }, [walletProvider]);
+
+  return address;
+};
+
+function determineIfCanExecute({
+  hasApproved,
+  totalApprovers,
+  threshold,
+}: {
+  hasApproved: boolean;
+  totalApprovers: number;
+  threshold: number;
+}) {
+  const remainingNeeded = threshold - totalApprovers;
+
+  if (remainingNeeded === 0) {
+    return true;
+  }
+
+  // if there is one left, and i haven't signed, i can sign and approve
+  if (remainingNeeded === 1) {
+    if (!hasApproved) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 const ViewProposal = ({
   handleEditClicked,
   proposal,
@@ -272,14 +312,18 @@ const ViewProposal = ({
   proposal: Proposal;
   handleEditClicked: (evt: SyntheticEvent) => void;
 }) => {
+  const safeInformation = useContext(SafeInformationContext);
+  const walletProvider = useContext(WalletProviderContext);
   const safe = useSafe({
-    provider: useContext(WalletProviderContext),
-    safeAddress: useContext(SafeInformationContext)?.address,
+    provider: walletProvider,
+    safeAddress: safeInformation?.address,
   });
 
   const toaster = useToast();
 
   const { approvers, loadApprovers } = useGetSafeTxApprovals({ proposal });
+
+  const address = useAccountAddress();
 
   const signCallback = useCallback(async () => {
     if (!safe) return;
@@ -324,41 +368,65 @@ const ViewProposal = ({
     }
   }, [proposal, safe, toaster, loadApprovers]);
 
+  const hasApproved = address ? approvers.includes(address as Address) : false;
+
+  // count others that are needed to sign, taking into account self must have signed, and if self has signed
+  // exclude from others needed to sign
+  const canExecute = determineIfCanExecute({
+    hasApproved,
+    totalApprovers: approvers.length,
+    threshold: safeInformation?.threshold || 0,
+  });
+
   return (
-    <View>
-      <View.Item>Nonce: {proposal.nonce}</View.Item>
-      {proposal.actions?.map((action, indx: number) => (
-        <>
-          <View.Item>Proposal #{indx}</View.Item>
-          <View.Item>To: {action.to as Address}</View.Item>
-          <View.Item>Value: {action.value}</View.Item>
-          {action.data ? (
-            <>
-              <View.Item>Data: {action.data}</View.Item>
-              <View.Item>
-                Data Actions:{" "}
-                <pre>
-                  <DataActionPreview
-                    data={action.data as Hex}
-                    to={action.to as Address}
-                  />
-                </pre>
-              </View.Item>
-            </>
-          ) : (
-            <View.Item>No data</View.Item>
-          )}
-        </>
-      ))}
-      <View.Item>Approvers: {approvers.join(",")}</View.Item>
-      <View.Item>
-        <View gap={4} direction="row">
-          <Button onClick={handleEditClicked}>Edit</Button>
-          <Button onClick={signCallback}>Sign</Button>
-          <Button onClick={signAndExecuteCallback}>Sign and Execute</Button>
-        </View>
-      </View.Item>
-    </View>
+    <>
+      <View>
+        <View.Item>Nonce: {proposal.nonce}</View.Item>
+        {proposal.actions?.map((action, indx: number) => (
+          <>
+            <View.Item>Proposal #{indx}</View.Item>
+            <View.Item>To: {action.to as Address}</View.Item>
+            <View.Item>Value: {action.value}</View.Item>
+            {action.data ? (
+              <>
+                <View.Item>Data: {action.data}</View.Item>
+                <View.Item>
+                  Data Actions:{" "}
+                  <pre>
+                    <DataActionPreview
+                      data={action.data as Hex}
+                      to={action.to as Address}
+                    />
+                  </pre>
+                </View.Item>
+              </>
+            ) : (
+              <View.Item>No data</View.Item>
+            )}
+          </>
+        ))}
+      </View>
+      <View>
+        <View.Item>
+          Approvers: ({approvers.length} out of {safeInformation?.threshold}{" "}
+          signed)
+        </View.Item>
+        {approvers.map((approver) => (
+          <View.Item key={approver}>
+            {approver} <b>{approver === address && "(you)"}</b>
+          </View.Item>
+        ))}
+      </View>
+      <View gap={4} direction="row">
+        <Button onClick={handleEditClicked}>Edit</Button>
+        <Button onClick={signCallback} disabled={hasApproved}>
+          Sign
+        </Button>
+        <Button onClick={signAndExecuteCallback} disabled={!canExecute}>
+          Sign and Execute
+        </Button>
+      </View>
+    </>
   );
 };
 
