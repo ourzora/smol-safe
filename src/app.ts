@@ -293,7 +293,7 @@ function app() {
       // do execute
       try {
         create(data["threshold"], data["signers"].split("\n"));
-      } catch (e) {
+      } catch (e: any) {
         log(e.toString());
         console.error(e);
       }

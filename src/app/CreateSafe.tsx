@@ -27,12 +27,6 @@ function validateSafeArguments(values: any) {
   return errors;
 }
 
-function wait(tm: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, tm);
-  });
-}
-
 export function CreateSafe() {
   const provider = useContext(WalletProviderContext);
   const network = useContext(CurrentNetwork);

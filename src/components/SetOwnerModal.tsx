@@ -42,7 +42,7 @@ const ButtonPanel = ({
 
 const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
   const safeInformation = useContext(SafeInformationContext);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
   return (
     <Formik
       initialValues={{ address: "0x", threshold: safeInformation?.threshold }}

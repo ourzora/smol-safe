@@ -6,7 +6,7 @@ import {
   useCallback,
 } from "react";
 import { Outlet, useParams } from "react-router-dom";
-import { CurrentNetwork, WalletProviderContext } from "./Root";
+import { WalletProviderContext } from "./Root";
 import { Signer, ethers } from "ethers";
 import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
 import { contractNetworks } from "../chains";
