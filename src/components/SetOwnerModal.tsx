@@ -7,8 +7,7 @@ import { GenericField } from "./GenericField";
 import { yupAddress } from "../utils/validators";
 import { number, object } from "yup";
 import { useSearchParams } from "react-router-dom";
-import { SafeDataProvider } from "../app/ViewSafe";
-import { SafeInformationContext } from "../app/SafeInformation";
+import { SafeInformationContext } from "../app/ViewSafe";
 
 export type OwnerAction =
   | undefined
@@ -44,18 +43,17 @@ const ButtonPanel = ({
 const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
   const safeInformation = useContext(SafeInformationContext);
   const [searchParams, setSearchParams] = useSearchParams();
-  const safeData = useContext(SafeDataProvider);
   return (
     <Formik
       initialValues={{ address: "0x", threshold: safeInformation?.threshold }}
       validationSchema={object({ address: yupAddress, threshold: number() })}
       onSubmit={async ({ address, threshold }) => {
         console.log("submit!!!");
-        if (!safeData || !safeInformation) {
+        if (!safeInformation) {
           return;
         }
 
-        const addOwnerTx = await safeData.safeSdk.createAddOwnerTx({
+        const addOwnerTx = await safeInformation.safeSdk.createAddOwnerTx({
           ownerAddress: address,
           threshold: threshold,
         });
@@ -101,11 +99,10 @@ const RemoveOwnerModalContent = ({
   target: string;
 }) => {
   const [_, setParams] = useSearchParams();
-  const safeData = useContext(SafeDataProvider);
   const safeInformation = useContext(SafeInformationContext);
 
   const onSubmitClick = async ({ threshold }: any) => {
-    const removeOwnerTx = await safeData?.safeSdk.createRemoveOwnerTx({
+    const removeOwnerTx = await safeInformation?.safeSdk.createRemoveOwnerTx({
       ownerAddress: safeInformation!.address,
       threshold: threshold,
     });

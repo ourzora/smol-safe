@@ -2,8 +2,14 @@ import { FormControl, Button, TextField, Divider, View, Card } from "reshaped";
 import { useFormik } from "formik";
 import { isAddress } from "viem";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { CurrentNetwork } from "./Root";
 
 function FormAddressInput() {
+  const navigate = useNavigate();
+
+  const network = useContext(CurrentNetwork);
+
   const formik = useFormik({
     initialValues: {
       address: "",
@@ -16,7 +22,7 @@ function FormAddressInput() {
       return errors;
     },
     onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+      navigate(`/safe/${network}/${values.address}`);
     },
   });
 

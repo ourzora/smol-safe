@@ -70,6 +70,7 @@ const pgn = {
 
 export const allowedNetworks: { [chainId: number]: chains.Chain }= {
   [999]: chains.zoraTestnet,
+  [999999999]: chains.zoraSepolia,
   [424]: pgn,
 };
 

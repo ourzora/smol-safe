@@ -11,10 +11,9 @@ import { Signer, ethers } from "ethers";
 import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
 import { contractNetworks } from "../chains";
 import { Button, View, Text } from "reshaped";
+import { Address } from "viem";
 
-export const SafeDataProvider = createContext<
-  undefined | Awaited<ReturnType<typeof getSafeSDK>>
->(undefined);
+type SafeData = Awaited<ReturnType<typeof getSafeSDK>>;
 
 async function getSafeSDK(safeAddress: string, signer: Signer) {
   const ethAdapter = new EthersAdapter({
@@ -36,37 +35,90 @@ async function getSafeSDK(safeAddress: string, signer: Signer) {
   return { safeSdk, safeSdk2, signer };
 }
 
+type SafeInformationType = {
+  owners: string[];
+  threshold: number;
+  chainId: number;
+  nonce: number;
+  address: Address;
+  safeSdk: Safe;
+  safeSdk2: Safe;
+};
+
+export const SafeInformationContext = createContext<
+  SafeInformationType | undefined
+>(undefined);
+
+const useLoadSafeInformation = ({
+  safeData,
+}: {
+  safeData: SafeData | undefined;
+}) => {
+  const [safeInformation, setSafeInformation] = useState<SafeInformationType>();
+
+  useEffect(() => {
+    if (!safeData) return;
+
+    const loadSafeInfo = async () => {
+      const { safeSdk, safeSdk2 } = safeData;
+      const owners = await safeSdk.getOwners();
+      const threshold = await safeSdk.getThreshold();
+      const chainId = await safeSdk.getChainId();
+      const nonce = await safeSdk.getNonce();
+      const address = (await safeSdk.getAddress()) as Address;
+
+      setSafeInformation({
+        owners,
+        threshold,
+        chainId,
+        nonce,
+        address,
+        safeSdk,
+        safeSdk2,
+      });
+    };
+
+    loadSafeInfo();
+  }, [safeData]);
+
+  return safeInformation;
+};
+
 export const ViewSafe = () => {
   const params = useParams();
-  const [safeData, setSafeData] = useState<any>();
+  const [safeData, setSafeData] = useState<SafeData>();
   const providerContext = useContext(WalletProviderContext);
-  const currentNetwork = useContext(CurrentNetwork);
+  // const currentNetwork = useContext(CurrentNetwork);
 
   const setupSafe = useCallback(async () => {
-    if (currentNetwork.toString() !== params.networkId) {
-      return;
-    }
     if (params.safeAddress && providerContext) {
       setSafeData(
         await getSafeSDK(params.safeAddress, providerContext.getSigner())
       );
     }
-  }, [params]);
+  }, [params.safeAddress, providerContext]);
 
   const switchNetwork = useCallback(() => {
+    if (!params.networkId) return;
     providerContext?.send("wallet_switchEthereumChain", [
       {
-        chainId: `0x${parseInt(params.networkId!, 10).toString(16)}`,
+        chainId: `0x${parseInt(params.networkId!).toString(16)}`,
       },
     ]);
-  }, [providerContext]);
+  }, [params.networkId, providerContext]);
+
+  useEffect(() => {
+    switchNetwork();
+  }, [switchNetwork]);
 
   useEffect(() => {
     setupSafe();
-  }, []);
+  }, [setupSafe]);
+
+  const safeInformation = useLoadSafeInformation({ safeData });
 
   return (
-    <SafeDataProvider.Provider value={safeData}>
+    <SafeInformationContext.Provider value={safeInformation}>
       <View paddingTop={8} paddingBottom={8}>
         <Text variant="featured-2">View Safe</Text>
         <View paddingTop={4} />
@@ -76,6 +128,6 @@ export const ViewSafe = () => {
           <Button onClick={switchNetwork}>Switch network</Button>
         )}
       </View>
-    </SafeDataProvider.Provider>
+    </SafeInformationContext.Provider>
   );
 };
