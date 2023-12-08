@@ -42,6 +42,7 @@ type SafeInformationType = {
   nonce: number;
   address: Address;
   safeSdk: Safe;
+  safeSdk2: Safe;
 };
 
 export const SafeInformationContext = createContext<
@@ -59,7 +60,7 @@ const useLoadSafeInformation = ({
     if (!safeData) return;
 
     const loadSafeInfo = async () => {
-      const { safeSdk } = safeData;
+      const { safeSdk, safeSdk2 } = safeData;
       const owners = await safeSdk.getOwners();
       const threshold = await safeSdk.getThreshold();
       const chainId = await safeSdk.getChainId();
@@ -73,6 +74,7 @@ const useLoadSafeInformation = ({
         nonce,
         address,
         safeSdk,
+        safeSdk2,
       });
     };
 
@@ -86,22 +88,18 @@ export const ViewSafe = () => {
   const params = useParams();
   const [safeData, setSafeData] = useState<SafeData>();
   const providerContext = useContext(WalletProviderContext);
-  const currentNetwork = useContext(CurrentNetwork);
+  // const currentNetwork = useContext(CurrentNetwork);
 
   const setupSafe = useCallback(async () => {
-    if (currentNetwork.toString() !== params.networkId) {
-      return;
-    }
     if (params.safeAddress && providerContext) {
       setSafeData(
         await getSafeSDK(params.safeAddress, providerContext.getSigner())
       );
     }
-  }, [currentNetwork, params.networkId, params.safeAddress, providerContext]);
+  }, [params.safeAddress, providerContext]);
 
   const switchNetwork = useCallback(() => {
     if (!params.networkId) return;
-    console.log("network", params.networkId);
     providerContext?.send("wallet_switchEthereumChain", [
       {
         chainId: `0x${parseInt(params.networkId!).toString(16)}`,
