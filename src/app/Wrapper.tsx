@@ -27,16 +27,16 @@ const router = createHashRouter([
         Component: ViewSafe,
         children: [
           {
-            path: '/safe/:networkId/:safeAddress',
+            path: "/safe/:networkId/:safeAddress",
             index: true,
             Component: SafeInformation,
           },
           {
-            path: '/safe/:networkId/:safeAddress/proposal/new',
+            path: "/safe/:networkId/:safeAddress/new",
             index: true,
             Component: NewSafeProposal,
           },
-        ]
+        ],
       },
     ],
   },
