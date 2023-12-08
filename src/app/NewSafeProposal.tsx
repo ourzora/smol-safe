@@ -1,5 +1,5 @@
 import { Field, FieldArray, Formik } from "formik";
-import { SafeInformation } from "./SafeInformation";
+import { SafeInformation, SafeInformationContext } from "./SafeInformation";
 import {
   Card,
   View,
@@ -104,11 +104,123 @@ const DEFAULT_PROPOSAL = {
   actions: [DEFAULT_ACTION_ITEM],
 };
 
+const createSafeAdapter = async ({
+  provider,
+  safeAddress,
+}: {
+  provider: ethers.providers.Web3Provider;
+  safeAddress: Address;
+}) => {
+  const ethAdapter = new EthersAdapter({
+    ethers,
+    signerOrProvider: provider!.getSigner(),
+  });
+  return await Safe.create({
+    ethAdapter,
+    safeAddress,
+    contractNetworks,
+  });
+};
+
+const createSafeTransaction = async ({
+  proposal,
+  safe,
+}: {
+  proposal: Proposal;
+  safe: Safe;
+}) => {
+  if (!proposal.actions) {
+    return;
+  }
+  const proposalData =
+    proposal.actions.length === 1 ? proposal.actions[0] : proposal?.actions;
+
+  return await safe.createTransaction({
+    safeTransactionData: proposalData,
+    options: { nonce: proposal.nonce || undefined },
+  });
+};
+
+const signTx = async ({
+  proposal,
+  safe,
+}: {
+  proposal: Proposal;
+  safe: Safe;
+}) => {
+  const txn = await createSafeTransaction({
+    proposal,
+    safe,
+  });
+  if (!txn) {
+    throw new Error("No txn");
+  }
+  // const executedTxn = await safe.executeTransaction(txn);
+  // const response = await executedTxn.transactionResponse?.wait();
+  const txHash = await safe.getTransactionHash(txn);
+  const executedTxn = await safe.approveTransactionHash(txHash);
+  const response = await executedTxn.transactionResponse?.wait();
+
+  console.log({ response });
+
+  return executedTxn;
+};
+
+const signAndExecuteTx = async ({
+  proposal,
+  safe,
+}: {
+  proposal: Proposal;
+  safe: Safe;
+}) => {
+  const txn = await createSafeTransaction({
+    proposal,
+    safe,
+  });
+  if (!txn) {
+    throw new Error("No txn");
+  }
+  const executedTxn = await safe.executeTransaction(txn);
+  const response = await executedTxn.transactionResponse?.wait();
+
+  console.log({ response });
+
+  return executedTxn;
+};
+
+const useSafe = ({
+  provider,
+  safeAddress,
+}: {
+  provider: ethers.providers.Web3Provider | null;
+  safeAddress: Address | undefined;
+}) => {
+  const [safe, setSafe] = useState<Safe>();
+
+  useEffect(() => {
+    if (!provider || !safeAddress) {
+      return;
+    }
+
+    const loadSafe = async () => {
+      const adapter = await createSafeAdapter({ provider, safeAddress });
+      setSafe(adapter);
+    };
+
+    loadSafe();
+  }, [provider, safeAddress]);
+
+  return safe;
+};
+
 export const NewSafeProposal = () => {
   const [params, setParams] = useSearchParams();
   const [proposal, setProposal] = useState<undefined | Proposal>();
   const [isEditing, setIsEditing] = useState(true);
-
+  const safe = useSafe({
+    provider: useContext(WalletProviderContext),
+    safeAddress: useContext(SafeInformationContext)?.address,
+  });
   useEffect(() => {
     if (proposal) {
       return;
@@ -133,34 +245,16 @@ export const NewSafeProposal = () => {
     [setIsEditing]
   );
 
-  const provider = useContext(WalletProviderContext);
   const toaster = useToast();
-  const safeData = useContext(SafeDataProvider);
 
-  const submitCallback = useCallback(async () => {
+  const signCallback = useCallback(async () => {
+    if (!safe) return;
     try {
-      const ethAdapter = new EthersAdapter({
-        ethers,
-        signerOrProvider: provider!.getSigner(),
+      const executedTxn = await signTx({
+        proposal: proposal!,
+        safe,
       });
-      const adapter = await Safe.create({
-        ethAdapter,
-        safeAddress: await safeData!.safeSdk.getAddress(),
-        contractNetworks,
-      });
-      if (!proposal?.actions) {
-        return;
-      }
-      const proposalData =
-        proposal.actions.length === 1 ? proposal.actions[0] : proposal?.actions;
-
-      const txn = await adapter.createTransaction({
-        safeTransactionData: proposalData,
-        options: { nonce: proposal.nonce || undefined },
-      });
-      const executedTxn = await adapter.executeTransaction(txn);
-      const response = await executedTxn.transactionResponse?.wait();
-
+      // call submit
       toaster.show({
         title: "Approved Txn Hash",
         text: `Approved with hash: ${executedTxn.hash}`,
@@ -171,7 +265,27 @@ export const NewSafeProposal = () => {
         text: `Message: ${e.message}`,
       });
     }
-  }, [provider, safeData, proposal?.actions, proposal?.nonce, toaster]);
+  }, [proposal, safe, toaster]);
+
+  const signAndExecuteCallback = useCallback(async () => {
+    if (!safe) return;
+    try {
+      const executedTxn = await signAndExecuteTx({
+        proposal: proposal!,
+        safe,
+      });
+      // call submit
+      toaster.show({
+        title: "Executed Txn Hash",
+        text: `Executed with hash: ${executedTxn.hash}`,
+      });
+    } catch (e: any) {
+      toaster.show({
+        title: "Error creating safe",
+        text: `Message: ${e.message}`,
+      });
+    }
+  }, [proposal, safe, toaster]);
 
   const onSubmit = useCallback((result: Proposal) => {
     setProposal(result);
@@ -273,14 +387,17 @@ export const NewSafeProposal = () => {
                     ) : (
                       <View.Item>No data</View.Item>
                     )}
-                    <View.Item>
-                      <View gap={4} direction="row">
-                        <Button onClick={submitCallback}>Submit</Button>
-                        <Button onClick={setEdit}>Edit</Button>
-                      </View>
-                    </View.Item>
                   </>
                 ))}
+                <View.Item>
+                  <View gap={4} direction="row">
+                    <Button onClick={setEdit}>Edit</Button>
+                    <Button onClick={signCallback}>Sign</Button>
+                    <Button onClick={signAndExecuteCallback}>
+                      Sign and Execute
+                    </Button>
+                  </View>
+                </View.Item>
               </View>
             )}
           </>
