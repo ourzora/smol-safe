@@ -1,5 +1,5 @@
 import { Field, FieldArray, Formik } from "formik";
-import { SafeInformation } from "./SafeInformation";
+import { SafeInformation } from "../components/SafeInformation";
 import { Card, View, Text, Button, useToast } from "reshaped";
 import {
   SyntheticEvent,
@@ -445,55 +445,59 @@ const EditProposal = ({
   const defaultActions = proposal || DEFAULT_PROPOSAL;
 
   return (
-    <Card>
-      <Formik
-        validationSchema={proposalSchema}
-        initialValues={defaultActions}
-        onSubmit={onSubmit}
-      >
-        {({ handleSubmit, values, isValid }) => (
-          <form onSubmit={handleSubmit}>
-            <View gap={4}>
-              <View.Item>
-                <Text variant="featured-2">New Proposal Details</Text>
-              </View.Item>
-              <View.Item>
-                <Field name="nonce">
-                  {GenericField({
-                    label: "Nonce (optional)",
-                    fieldProps: { type: "number" },
-                  })}
-                </Field>
-              </View.Item>
-              <FieldArray name="actions">
-                {(actions) => (
-                  <>
-                    {values.actions?.map((_, indx) => (
-                      <FormActionItem
-                        remove={actions.remove}
-                        indx={indx}
-                        name={`actions.${indx}`}
-                      />
-                    ))}
-                    <View direction="row" justify="space-between">
-                      <View> </View>
-                      <Button onClick={actions.handlePush(DEFAULT_ACTION_ITEM)}>
-                        Add
-                      </Button>
-                    </View>
-                  </>
-                )}
-              </FieldArray>
-              <View.Item>
-                <Button disabled={!isValid} type="submit">
-                  Done
-                </Button>
-              </View.Item>
-            </View>
-          </form>
-        )}
-      </Formik>
-    </Card>
+    <View paddingTop={4}>
+      <Card>
+        <Formik
+          validationSchema={proposalSchema}
+          initialValues={defaultActions}
+          onSubmit={onSubmit}
+        >
+          {({ handleSubmit, values, isValid }) => (
+            <form onSubmit={handleSubmit}>
+              <View gap={4}>
+                <View.Item>
+                  <Text variant="featured-2">New Proposal Details</Text>
+                </View.Item>
+                <View.Item>
+                  <Field name="nonce">
+                    {GenericField({
+                      label: "Nonce (optional)",
+                      fieldProps: { type: "number" },
+                    })}
+                  </Field>
+                </View.Item>
+                <FieldArray name="actions">
+                  {(actions) => (
+                    <>
+                      {values.actions?.map((_, indx) => (
+                        <FormActionItem
+                          remove={actions.remove}
+                          indx={indx}
+                          name={`actions.${indx}`}
+                        />
+                      ))}
+                      <View direction="row" justify="space-between">
+                        <View> </View>
+                        <Button
+                          onClick={actions.handlePush(DEFAULT_ACTION_ITEM)}
+                        >
+                          Add
+                        </Button>
+                      </View>
+                    </>
+                  )}
+                </FieldArray>
+                <View.Item>
+                  <Button disabled={!isValid} type="submit">
+                    Done
+                  </Button>
+                </View.Item>
+              </View>
+            </form>
+          )}
+        </Formik>
+      </Card>
+    </View>
   );
 };
 
