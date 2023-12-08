@@ -68,17 +68,21 @@ const pgn = {
   },
 }
 
-export const allowedNetworks: any = {
+export const allowedNetworks: { [chainId: number]: chains.Chain }= {
   [999]: chains.zoraTestnet,
   [424]: pgn,
 };
 
 Object.keys(contractNetworks).map((network) => {
-  if (allowedNetworks[network]) {
+  if (allowedNetworks[+network]) {
     // if already exists skip
     return;
   }
   const viemChain = Object.values(chains).find((chain) => 
     chain.id.toString() === network  );
-  allowedNetworks[network] = viemChain;
+
+  if (!viemChain) {
+    return;
+  }
+  allowedNetworks[+network] = viemChain;
 });
