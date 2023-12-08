@@ -43,7 +43,7 @@ const ButtonPanel = ({
 
 const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
   const safeInformation = useContext(SafeInformationContext);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [_, setSearchParams] = useSearchParams();
   const safeData = useContext(SafeDataProvider);
   return (
     <Formik

@@ -1,7 +1,6 @@
 import {StrictMode} from "react";
 import { createRoot } from "react-dom/client";
 import { Wrapper } from "./app/Wrapper";
-import { App } from "./app/App";
 import "reshaped/themes/reshaped/theme.css";
 
 const container = document.getElementById("app");

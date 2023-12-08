@@ -60,12 +60,6 @@ const FormActionItem = ({
   );
 };
 
-type ActionItem = {
-  to: Address;
-  value: string;
-  data: Hex;
-};
-
 const proposalSchema = object({
   nonce: number().nullable(),
   actions: array(
@@ -159,7 +153,7 @@ export const NewSafeProposal = () => {
         options: { nonce: proposal.nonce || undefined },
       });
       const executedTxn = await adapter.executeTransaction(txn);
-      const response = await executedTxn.transactionResponse?.wait();
+      await executedTxn.transactionResponse?.wait();
 
       toaster.show({
         title: "Approved Txn Hash",

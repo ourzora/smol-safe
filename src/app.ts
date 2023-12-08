@@ -1,8 +1,5 @@
-import Safe, {
-  ContractNetworksConfig,
-  EthersAdapter,
-  SafeFactory,
-} from "@safe-global/protocol-kit";
+import Safe, { EthersAdapter, SafeFactory } from "@safe-global/protocol-kit";
+// @ts-ignore
 import Toastify from "toastify-js";
 import { ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
@@ -54,7 +51,7 @@ async function getSafeSDK(safeAddress: string) {
   return { safeSdk, safeSdk2, signer };
 }
 
-async function runit(operation, safeAddress, transaction) {
+async function runit(operation: any, safeAddress: any, transaction: any) {
   try {
     const { safeSdk, safeSdk2 } = await getSafeSDK(safeAddress);
 
@@ -80,6 +77,7 @@ async function runit(operation, safeAddress, transaction) {
       log("transaction has been confirmed");
     }
   } catch (err) {
+    // @ts-ignore
     log(err.toString());
   }
 }
@@ -99,6 +97,7 @@ async function create(threshold: string, signers: string[]) {
     });
     log(`deployed new safe: ${await sdk.getAddress()}`);
   } catch (err) {
+    // @ts-ignore
     log(err.toString());
     throw err;
   }
@@ -112,7 +111,7 @@ async function getSafeData(safeAddress: string) {
     const chainId = await signer.getChainId();
 
     return { owners, threshold, chainId };
-  } catch (err) {
+  } catch (err: any) {
     log(err.toString());
     throw err;
   }
@@ -131,19 +130,20 @@ function formDataAsDict(form: HTMLFormElement) {
   const data = {};
   const formData = new FormData(form);
   for (const pair of formData.entries()) {
+    // @ts-ignore
     data[pair[0]] = pair[1];
   }
   return data;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  (window as any).ethereum.on("chainChanged", (networkId) => {
+  (window as any).ethereum.on("chainChanged", (networkId: any) => {
     document.querySelector("#network-id")!.innerHTML = parseInt(
       networkId,
       16
     ).toString();
   });
-  (window as any).ethereum.on("accountsChanged", (accounts) => {
+  (window as any).ethereum.on("accountsChanged", (accounts: any) => {
     log(`Switched account to ${accounts[0]}`);
     document.querySelector<HTMLDivElement>("#user-account")!.innerHTML =
       accounts[0];
@@ -180,6 +180,7 @@ function app() {
 
   async function getSafeInfo() {
     const data = formDataAsDict(signForm as HTMLFormElement);
+    // @ts-ignore
     const safeData = await getSafeData(data["safeAddress"]);
     document.querySelector("#safe-result")!.innerHTML = JSON.stringify(
       safeData,
@@ -253,7 +254,7 @@ function app() {
       });
     signForm.addEventListener("submit", (evt) => {
       evt.preventDefault();
-      const data = formDataAsDict(signForm as HTMLFormElement);
+      const data = formDataAsDict(signForm as HTMLFormElement) as any;
       try {
         const txn = {
           to: data["to"],
@@ -262,7 +263,7 @@ function app() {
         };
         console.log({ txn });
         runit(data["operation"], data["safeAddress"], txn);
-      } catch (e) {
+      } catch (e: any) {
         log(e);
         alert(e.toString());
         return;
@@ -289,11 +290,12 @@ function app() {
   if (executeForm) {
     executeForm.addEventListener("submit", (evt) => {
       evt.preventDefault();
-      const data = formDataAsDict(executeForm as HTMLFormElement);
+      const data = formDataAsDict(executeForm as HTMLFormElement) as any;
       // do execute
       try {
+        // @ts-ignore
         create(data["threshold"], data["signers"].split("\n"));
-      } catch (e) {
+      } catch (e: any) {
         log(e.toString());
         console.error(e);
       }

@@ -29,6 +29,7 @@ const router = createHashRouter([
           {
             path: '/safe/:networkId/:safeAddress',
             index: true,
+            // @ts-ignore
             Component: SafeInformation,
           },
           {
