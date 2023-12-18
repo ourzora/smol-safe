@@ -1,5 +1,5 @@
 import { SyntheticEvent, useContext } from "react";
-import { Button, Modal, Text, View } from "reshaped";
+import { Button, Modal, Text, View, useToast } from "reshaped";
 import { AddressView } from "./AddressView";
 import { Address } from "viem";
 import { Field, Form, Formik } from "formik";
@@ -42,32 +42,37 @@ const ButtonPanel = ({
 
 const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
   const safeInformation = useContext(SafeInformationContext);
+  const toast = useToast();
   const [, setSearchParams] = useSearchParams();
   return (
     <Formik
       initialValues={{ address: "0x", threshold: safeInformation?.threshold }}
       validationSchema={object({ address: yupAddress, threshold: number() })}
       onSubmit={async ({ address, threshold }) => {
-        console.log("submit!!!");
         if (!safeInformation) {
           return;
         }
 
-        const addOwnerTx = await safeInformation.safeSdk.createAddOwnerTx({
-          ownerAddress: address,
-          threshold: threshold,
-        });
-        setSearchParams({
-          proposal: JSON.stringify({
-            actions: [
-              {
-                data: addOwnerTx.data.data,
-                value: 0,
-                to: safeInformation.address,
-              },
-            ],
-          }),
-        });
+        try {
+          const addOwnerTx = await safeInformation.safeSdk.createAddOwnerTx({
+            ownerAddress: address,
+            threshold: threshold,
+          });
+          setSearchParams({
+            proposal: JSON.stringify({
+              actions: [
+                {
+                  data: addOwnerTx.data.data,
+                  value: 0,
+                  to: safeInformation.address,
+                },
+              ],
+            }),
+          });
+
+        } catch (err: any) {
+          toast.show({title: "Error Updating Safe", text: err.toString()});
+        }
         onClose();
       }}
     >
