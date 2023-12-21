@@ -10,7 +10,6 @@ export const GenericField = ({
 }) => {
   return ({ field: { name, value, onChange }, form: { errors } }: any) => {
     const error = get(errors, name);
-    // console.log({ error, errors, value, name });
 
     return (
       <View paddingTop={1} paddingBottom={1}>

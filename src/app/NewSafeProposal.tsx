@@ -8,17 +8,27 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Address, Hex } from "viem";
-import { validateAddress, validateETH, yupAddress } from "../utils/validators";
+import { Address, Hex, formatEther } from "viem";
+import { validateAddress, validateETH } from "../utils/validators";
 import { GenericField } from "../components/GenericField";
-import { useSearchParams } from "react-router-dom";
-import { InferType, array, number, object, string } from "yup";
 import { DataActionPreview } from "../components/DataActionPreview";
 import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
 import { WalletProviderContext } from "./Root";
 import { ethers } from "ethers";
 import { contractNetworks } from "../chains";
 import { SafeInformationContext } from "./ViewSafe";
+import {
+  DEFAULT_ACTION_ITEM,
+  DEFAULT_PROPOSAL,
+  Proposal,
+  proposalSchema,
+} from "../schemas/proposal";
+import { useSetParamsFromQuery } from "../hooks/useSetParamsFromQuery";
+import { useLoadProposalFromQuery } from "../hooks/useLoadProposalFromQuery";
+import {
+  transformValuesFromWei,
+  transformValuesToWei,
+} from "../utils/etherFormatting";
 
 const FormActionItem = ({
   name,
@@ -49,44 +59,6 @@ const FormActionItem = ({
       <Field name={`${name}.data`}>{GenericField({ label: "Data" })}</Field>
     </View>
   );
-};
-
-const proposalSchema = object({
-  nonce: number().nullable(),
-  actions: array(
-    object({
-      to: yupAddress,
-      value: string()
-        .default("0")
-        .matches(
-          /^[0-9]+(\.[0-9]+)?$/,
-          "Needs to be a ETH price (0, 1, or 0.23)"
-        )
-        .required(),
-      data: string()
-        .default("0x")
-        .matches(
-          /^0x(?:[0-9A-Za-z][0-9A-Za-z])*$/,
-          "Data is required to match hex format"
-        )
-        .required(),
-    })
-  ),
-});
-
-interface Proposal extends InferType<typeof proposalSchema> {
-  // using interface instead of type generally gives nicer editor feedback
-}
-
-const DEFAULT_ACTION_ITEM = {
-  to: "0x",
-  value: "0",
-  data: "0x",
-};
-
-const DEFAULT_PROPOSAL = {
-  nonce: null,
-  actions: [DEFAULT_ACTION_ITEM],
 };
 
 const createSafeAdapter = async ({
@@ -194,37 +166,6 @@ const useSafe = ({
   return safe;
 };
 
-const useLoadProposalFromQuery = () => {
-  const [proposal, setProposal] = useState<undefined | Proposal>();
-  const [params] = useSearchParams();
-
-  useEffect(() => {
-    const targets = params.get("targets")?.split("|");
-    const calldatas = params.get("calldatas")?.split("|");
-    const values = params.get("values")?.split("|");
-    if (targets && calldatas) {
-      // ensure the 3 lengths are the same.  check if values also has the same length if its not empty
-      // check the inverse of the above, if inverse is true, return:
-      if (
-        targets.length !== calldatas.length ||
-        (values?.length && values?.length !== targets.length)
-      ) {
-        console.log("invalid lengths");
-        return;
-      }
-
-      const actions = targets.map((target, index) => ({
-        to: target,
-        data: calldatas[index]!,
-        value: (values && values[index]) || "0",
-      }));
-      setProposal({ actions });
-    }
-  }, [params, setProposal]);
-
-  return proposal;
-};
-
 const useGetSafeTxApprovals = ({ proposal }: { proposal: Proposal }) => {
   const safeInformation = useContext(SafeInformationContext);
 
@@ -235,7 +176,6 @@ const useGetSafeTxApprovals = ({ proposal }: { proposal: Proposal }) => {
 
   const loadApprovers = useCallback(async () => {
     if (!safeSdk || !safeSdk2) return;
-    // const { safeSdk, safeSdk2 } = await getSafeSDK(safeAddress);
     const txn = await createSafeTransaction({
       proposal,
       safe: safeSdk,
@@ -380,7 +320,7 @@ const ViewProposal = ({
           <>
             <View.Item>Proposal #{indx}</View.Item>
             <View.Item>To: {action.to as Address}</View.Item>
-            <View.Item>Value: {action.value}</View.Item>
+            <View.Item>Value: {formatEther(BigInt(action.value))}</View.Item>
             {action.data ? (
               <>
                 <View.Item>Data: {action.data}</View.Item>
@@ -433,10 +373,13 @@ const EditProposal = ({
   setProposal: (result: Proposal) => void;
   setIsEditing: (editing: boolean) => void;
 }) => {
+  const setProposalParams = useSetParamsFromQuery();
   const onSubmit = useCallback(
     (result: Proposal) => {
-      setProposal(result);
-      // setParams({ proposal: JSON.stringify(result) });
+      setProposal(transformValuesToWei(result));
+      if (proposal) {
+        setProposalParams(proposal);
+      }
       setIsEditing(false);
     },
     [setIsEditing, setProposal]
@@ -449,7 +392,7 @@ const EditProposal = ({
       <Card>
         <Formik
           validationSchema={proposalSchema}
-          initialValues={defaultActions}
+          initialValues={transformValuesFromWei(defaultActions)}
           onSubmit={onSubmit}
         >
           {({ handleSubmit, values, isValid }) => (
