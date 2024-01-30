@@ -29,7 +29,7 @@ export const AddressView = ({
         target="_blank"
         className="text-gray-600 hover:color-black transition-color"
         href={`${
-          (networkToExplorer as any)[currentNetwork]
+          (networkToExplorer as any)[Number(currentNetwork)]
         }/address/${address}`}
       >
         ↗

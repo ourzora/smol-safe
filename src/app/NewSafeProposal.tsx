@@ -29,6 +29,7 @@ import {
   transformValuesFromWei,
   transformValuesToWei,
 } from "../utils/etherFormatting";
+import { BrowserProvider } from "ethers";
 
 const FormActionItem = ({
   name,
@@ -65,12 +66,12 @@ const createSafeAdapter = async ({
   provider,
   safeAddress,
 }: {
-  provider: ethers.providers.Web3Provider;
+  provider: BrowserProvider;
   safeAddress: Address;
 }) => {
   const ethAdapter = new EthersAdapter({
     ethers,
-    signerOrProvider: provider!.getSigner(),
+    signerOrProvider: await provider!.getSigner(),
   });
   return await Safe.create({
     ethAdapter,
@@ -89,11 +90,9 @@ const createSafeTransaction = async ({
   if (!proposal.actions) {
     return;
   }
-  const proposalData =
-    proposal.actions.length === 1 ? proposal.actions[0] : proposal?.actions;
 
   return await safe.createTransaction({
-    safeTransactionData: proposalData,
+    transactions: proposal.actions,
     options: { nonce: proposal.nonce || undefined },
   });
 };
@@ -145,7 +144,7 @@ const useSafe = ({
   provider,
   safeAddress,
 }: {
-  provider: ethers.providers.Web3Provider | null;
+  provider: BrowserProvider | null;
   safeAddress: Address | undefined;
 }) => {
   const [safe, setSafe] = useState<Safe>();
@@ -205,9 +204,8 @@ const useAccountAddress = () => {
     if (!walletProvider) return;
 
     (async () => {
-      setAddress(
-        (await walletProvider.getSigner().getAddress()) as Address | undefined
-      );
+      const signer = await walletProvider.getSigner();
+      setAddress((await signer.getAddress()) as Address | undefined);
     })();
   }, [walletProvider]);
 

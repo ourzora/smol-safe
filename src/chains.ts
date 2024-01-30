@@ -9,6 +9,8 @@ const defaultL2Addresses = {
   fallbackHandlerAddress: "0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd",
   createCallAddress: "0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4",
   signMessageLibAddress: "0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2",
+  safeSingletonAddress: "0x",
+  simulateTxAccessorAddress: "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da",
 };
 
 const baseL2Addresses = {
@@ -19,28 +21,17 @@ const baseL2Addresses = {
   fallbackHandlerAddress: "0x017062a1dE2FE6b99BE3d9d37841FeD19F573804",
   createCallAddress: "0xB19D6FFc2182150F8Eb585b79D4ABcd7C5640A9d",
   signMessageLibAddress: "0x98FFBBF51bb33A056B08ddf711f289936AafF717",
+  safeSingletonAddress: "0x",
+  simulateTxAccessorAddress: "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da",
 };
 
-// sepolia is the same as base.
-const sepoliaAddresses = baseL2Addresses;
-
 export const contractNetworks: ContractNetworksConfig = {
-  // ZORA goerli
-  [999]: defaultL2Addresses,
-  // ZORA sepolia testnet
-  [999999999]: defaultL2Addresses,
-  // ZORA mainnet
-  [7777777]: defaultL2Addresses,
-  // base goerli
-  [84531]: baseL2Addresses,
-  // base mainnet
-  [8453]: baseL2Addresses,
-  // pgn sepolia
-  [58008]: defaultL2Addresses,
-  // pgn mainnet
-  [424]: defaultL2Addresses,
+  // // ZORA mainnet
+  // [`${chains.zora.id}`]: defaultL2Addresses,
+  // arbitrium sepolia
+  // [`${chains.arbitrumSepolia.id}`]: baseL2Addresses,
   // sepolia testnet
-  [11155111]: sepoliaAddresses,
+  // [`${chains.sepolia.id}`]: sepoliaAddresses,
 };
 
 const pgn = {
@@ -69,9 +60,14 @@ const pgn = {
 }
 
 export const allowedNetworks: { [chainId: number]: chains.Chain }= {
-  [999]: chains.zoraTestnet,
-  [999999999]: chains.zoraSepolia,
-  [424]: pgn,
+  [chains.zoraTestnet.id]: chains.zoraTestnet,
+  [chains.zoraSepolia.id]: chains.zoraSepolia,
+  [chains.arbitrumGoerli.id]: chains.arbitrumGoerli,
+  [chains.arbitrumSepolia.id]: chains.arbitrumSepolia,
+  [chains.arbitrum.id]: chains.arbitrum,
+  [chains.base.id]: chains.base,
+  [chains.baseSepolia.id]: chains.baseSepolia,
+  [chains.sepolia.id]: chains.sepolia,
 };
 
 Object.keys(contractNetworks).map((network) => {
