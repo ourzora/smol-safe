@@ -48,6 +48,7 @@ const pgn = {
 };
 
 export const allowedNetworks: { [chainId: number]: chains.Chain } = {
+  [chains.zora.id]: chains.zora,
   [chains.zoraTestnet.id]: chains.zoraTestnet,
   [chains.zoraSepolia.id]: chains.zoraSepolia,
   [chains.arbitrumGoerli.id]: chains.arbitrumGoerli,
