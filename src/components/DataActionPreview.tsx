@@ -29,7 +29,7 @@ export const DataActionPreview = ({ to, data }: { to: Address; data: Hex }) => {
     let json;
     try {
       const response = await fetch(
-        `https://${networkToEtherActor[currentNetwork]}.ether.actor/decode/${to}/${data}`
+        `https://${networkToEtherActor[Number(currentNetwork)]}.ether.actor/decode/${to}/${data}`
       );
       if (!response.ok) {
         throw new Error();

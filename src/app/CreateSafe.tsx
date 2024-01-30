@@ -1,4 +1,4 @@
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { CurrentNetwork, WalletProviderContext } from "./Root";
 import { Field, FieldArray, Formik } from "formik";
 import { Text, Button, FormControl, TextField, View, useToast } from "reshaped";
@@ -7,6 +7,8 @@ import { isAddress } from "viem";
 import { ethers } from "ethers";
 import { EthersAdapter, SafeFactory } from "@safe-global/protocol-kit";
 import { useNavigate } from "react-router-dom";
+import { AbstractSigner } from "ethers";
+import { BrowserProvider } from "ethers";
 
 function validateAddress(value: string) {
   if (!isAddress(value)) {
@@ -32,16 +34,37 @@ export function CreateSafe() {
   const network = useContext(CurrentNetwork);
   const toaster = useToast();
   const navigate = useNavigate();
+  const [signerInfo, setSignerInfo] = useState<
+    undefined | { signer: AbstractSigner; address: string }
+  >(undefined);
+
+  const updateSignerInfo = useCallback(
+    async (provider: BrowserProvider) => {
+      const signer = await provider.getSigner();
+      const address = await signer.getAddress();
+      setSignerInfo({ signer, address });
+    },
+    [setSignerInfo]
+  );
+
+  useEffect(() => {
+    if (provider) {
+      updateSignerInfo(provider);
+    }
+  }, [provider]);
 
   const submitCallback = useCallback(
     async (data: any) => {
+      if (!signerInfo) {
+        return;
+      }
       try {
         const ethAdapter = new EthersAdapter({
           ethers,
-          signerOrProvider: provider!.getSigner(),
+          signerOrProvider: signerInfo.signer,
         });
         const adapter = await SafeFactory.create({
-          ethAdapter,
+          ethAdapter: ethAdapter,
           contractNetworks,
         });
         const sdk = await adapter.deploySafe({
@@ -63,20 +86,20 @@ export function CreateSafe() {
         });
       }
     },
-    [provider]
+    [provider, signerInfo]
   );
 
   return (
     <View gap={4} paddingTop={10}>
       <Text variant="title-3">Create a new safe</Text>
       <Text variant="body-1">
-        Network: {allowedNetworks[network]?.name || "unknown"}
+        Network: {allowedNetworks[Number(network)]?.name || "unknown"}
       </Text>
       <Formik
         onSubmit={submitCallback}
         initialValues={{
           threshold: 1,
-          addresses: [provider!.getSigner()._address || "0x"],
+          addresses: [signerInfo?.address || "0x"],
         }}
         validate={validateSafeArguments}
       >
@@ -118,7 +141,7 @@ export function CreateSafe() {
                             />
                             {errors.addresses && errors.addresses[indx] && (
                               <FormControl.Error>
-                                {errors.addresses[indx]}
+                                {errors.addresses[indx].toString()}
                               </FormControl.Error>
                             )}
                           </FormControl>

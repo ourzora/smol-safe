@@ -63,7 +63,7 @@ const useLoadSafeInformation = ({
       const { safeSdk, safeSdk2 } = safeData;
       const owners = await safeSdk.getOwners();
       const threshold = await safeSdk.getThreshold();
-      const chainId = await safeSdk.getChainId();
+      const chainId = Number(await safeSdk.getChainId());
       const nonce = await safeSdk.getNonce();
       const address = (await safeSdk.getAddress()) as Address;
 
@@ -93,7 +93,7 @@ export const ViewSafe = () => {
   const setupSafe = useCallback(async () => {
     if (params.safeAddress && providerContext) {
       setSafeData(
-        await getSafeSDK(params.safeAddress, providerContext.getSigner())
+        await getSafeSDK(params.safeAddress, await providerContext.getSigner())
       );
     }
   }, [params.safeAddress, providerContext]);

@@ -2,7 +2,7 @@
 import { useCallback, useEffect } from "react";
 import { FormControl, Select } from "reshaped";
 import { allowedNetworks } from "../chains";
-import { Web3Provider } from "@ethersproject/providers";
+import { BrowserProvider } from "ethers";
 
 export const NetworkSwitcher = ({
   currentNetwork,
@@ -11,7 +11,7 @@ export const NetworkSwitcher = ({
 }: {
   currentNetwork: number;
   setCurrentNetwork: (chainId: number) => void;
-  provider: Web3Provider | undefined;
+  provider: BrowserProvider | undefined;
 }) => {
   const changeNetwork = useCallback(
     ({ value }: { value: string }) => {
