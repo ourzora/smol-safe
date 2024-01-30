@@ -1,4 +1,4 @@
-import { SyntheticEvent, useContext } from "react";
+import { SyntheticEvent } from "react";
 import { Button, Modal, Text, View, useToast } from "reshaped";
 import { AddressView } from "./AddressView";
 import { Address } from "viem";
@@ -6,8 +6,8 @@ import { Field, Form, Formik } from "formik";
 import { GenericField } from "./GenericField";
 import { yupAddress } from "../utils/validators";
 import { number, object } from "yup";
-import { useSearchParams } from "react-router-dom";
-import { SafeInformationContext } from "../app/ViewSafe";
+import { useOutletContext, useSearchParams } from "react-router-dom";
+import { SafeContext } from "./Contexts";
 
 export type OwnerAction =
   | undefined
@@ -41,7 +41,7 @@ const ButtonPanel = ({
 );
 
 const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
-  const safeInformation = useContext(SafeInformationContext);
+  const { safeInformation } = useOutletContext<SafeContext>();
   const toast = useToast();
   const [, setSearchParams] = useSearchParams();
   return (
@@ -103,7 +103,7 @@ const RemoveOwnerModalContent = ({
   target: string;
 }) => {
   const [_, setParams] = useSearchParams();
-  const safeInformation = useContext(SafeInformationContext);
+  const { safeInformation } = useOutletContext<SafeContext>();
 
   const onSubmitClick = async ({ threshold }: any) => {
     const removeOwnerTx = await safeInformation?.safeSdk.createRemoveOwnerTx({

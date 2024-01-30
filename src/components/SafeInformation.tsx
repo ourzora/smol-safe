@@ -1,11 +1,12 @@
-import { useContext, useState } from "react";
-import { SafeInformationContext } from "../app/ViewSafe";
+import { useState } from "react";
 import { Button, Card, Text, View } from "reshaped";
 import { allowedNetworks } from "../chains";
 import { InfoBox } from "../components/InfoBox";
 import { Address } from "viem";
 import { AddressView } from "../components/AddressView";
 import { OwnerAction, SetOwnerModal } from "../components/SetOwnerModal";
+import { useOutletContext } from "react-router-dom";
+import { SafeContext } from "./Contexts";
 
 const SafeInformationItem = ({
   title,
@@ -31,9 +32,8 @@ export const SafeInformation = ({
 }) => {
   const [ownerAction, setOwnerAction] = useState<OwnerAction>();
 
-  const safeInformation = useContext(SafeInformationContext);
+  const { safeInformation } = useOutletContext<SafeContext>();
 
-  if (!safeInformation) return <div></div>;
   return (
     <div>
       {ownerAction && (

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Address, Hex } from "viem";
 import {
   base,
@@ -9,7 +9,8 @@ import {
   zora,
   zoraTestnet,
 } from "viem/chains";
-import { CurrentNetwork } from "../app/Root";
+import { useOutletContext } from "react-router-dom";
+import { NetworkContext } from "./Contexts";
 
 const networkToEtherActor: any = {
   [mainnet.id]: "mainnet",
@@ -22,7 +23,7 @@ const networkToEtherActor: any = {
 };
 
 export const DataActionPreview = ({ to, data }: { to: Address; data: Hex }) => {
-  const currentNetwork = useContext(CurrentNetwork);
+  const currentNetwork = useOutletContext<NetworkContext>().currentNetwork;
   const [responseData, setResponseData] = useState<any>();
 
   const fetchData = useCallback(async () => {
