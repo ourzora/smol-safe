@@ -10,17 +10,17 @@ export const proposalSchema = object({
         .default("0")
         .matches(
           /^[0-9]+(\.[0-9]+)?$/,
-          "Needs to be a ETH price (0, 1, or 0.23)"
+          "Needs to be a ETH price (0, 1, or 0.23)",
         )
         .required(),
       data: string()
         .default("0x")
         .matches(
           /^0x(?:[0-9A-Za-z][0-9A-Za-z])*$/,
-          "Data is required to match hex format"
+          "Data is required to match hex format",
         )
         .required(),
-    })
+    }),
   ),
 });
 

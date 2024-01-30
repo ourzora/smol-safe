@@ -69,9 +69,8 @@ const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
               ],
             }),
           });
-
         } catch (err: any) {
-          toast.show({title: "Error Updating Safe", text: err.toString()});
+          toast.show({ title: "Error Updating Safe", text: err.toString() });
         }
         onClose();
       }}

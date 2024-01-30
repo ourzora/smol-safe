@@ -15,7 +15,6 @@ export const validateETH = (value: string) => {
   }
 };
 
-
 export const yupAddress = string()
-.matches(/^0x[a-fA-F0-9]{40}$/, "Needs to be a valid address")
-.required()
+  .matches(/^0x[a-fA-F0-9]{40}$/, "Needs to be a valid address")
+  .required();

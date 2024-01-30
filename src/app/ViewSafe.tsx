@@ -93,7 +93,7 @@ export const ViewSafe = () => {
   const setupSafe = useCallback(async () => {
     if (params.safeAddress && providerContext) {
       setSafeData(
-        await getSafeSDK(params.safeAddress, await providerContext.getSigner())
+        await getSafeSDK(params.safeAddress, await providerContext.getSigner()),
       );
     }
   }, [params.safeAddress, providerContext]);
