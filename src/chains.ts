@@ -36,38 +36,44 @@ export const contractNetworks: ContractNetworksConfig = {
 
 const pgn = {
   id: 424 as const,
-  name: 'PGN',
-  network: 'pgn',
+  name: "PGN",
+  network: "pgn",
   nativeCurrency: {
     decimals: 18,
-    name: 'Ether',
-    symbol: 'ETH',
+    name: "Ether",
+    symbol: "ETH",
   },
   rpcUrls: {
     default: {
-      http: ['https://rpc.publicgoods.network'],
-      webSocket: ['wss://rpc.publicgoods.network'],
+      http: ["https://rpc.publicgoods.network"],
+      webSocket: ["wss://rpc.publicgoods.network"],
     },
     public: {
-      http: ['https://rpc.publicgoods.network'],
-      webSocket: ['wss://rpc.publicgoods.network'],
+      http: ["https://rpc.publicgoods.network"],
+      webSocket: ["wss://rpc.publicgoods.network"],
     },
   },
   blockExplorers: {
-    etherscan: { name: 'Explorer', url: 'https://explorer.publicgoods.network' },
-    default: { name: 'Explorer', url: 'https://explorer.publicgoods.network' },
+    etherscan: {
+      name: "Explorer",
+      url: "https://explorer.publicgoods.network",
+    },
+    default: { name: "Explorer", url: "https://explorer.publicgoods.network" },
   },
-}
+};
 
-export const allowedNetworks: { [chainId: number]: chains.Chain }= {
+export const allowedNetworks: { [chainId: number]: chains.Chain } = {
   [chains.zoraTestnet.id]: chains.zoraTestnet,
   [chains.zoraSepolia.id]: chains.zoraSepolia,
   [chains.arbitrumGoerli.id]: chains.arbitrumGoerli,
   [chains.arbitrumSepolia.id]: chains.arbitrumSepolia,
+  [chains.arbitrumNova.id]: chains.arbitrumNova,
   [chains.arbitrum.id]: chains.arbitrum,
   [chains.base.id]: chains.base,
   [chains.baseSepolia.id]: chains.baseSepolia,
   [chains.sepolia.id]: chains.sepolia,
+  [chains.optimism.id]: chains.optimism,
+  [chains.optimismSepolia.id]: chains.optimismSepolia,
 };
 
 Object.keys(contractNetworks).map((network) => {
@@ -75,8 +81,9 @@ Object.keys(contractNetworks).map((network) => {
     // if already exists skip
     return;
   }
-  const viemChain = Object.values(chains).find((chain) => 
-    chain.id.toString() === network  );
+  const viemChain = Object.values(chains).find(
+    (chain) => chain.id.toString() === network
+  );
 
   if (!viemChain) {
     return;
