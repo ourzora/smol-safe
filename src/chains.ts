@@ -24,66 +24,39 @@ const baseL2Addresses = {
 // sepolia is the same as base.
 const sepoliaAddresses = baseL2Addresses;
 
-export const contractNetworks: ContractNetworksConfig = {
-  // ZORA goerli
-  [999]: defaultL2Addresses,
-  // ZORA sepolia testnet
-  [999999999]: defaultL2Addresses,
-  // ZORA mainnet
-  [7777777]: defaultL2Addresses,
-  // base goerli
-  [84531]: baseL2Addresses,
-  // base mainnet
-  [8453]: baseL2Addresses,
-  // pgn sepolia
-  [58008]: defaultL2Addresses,
-  // pgn mainnet
-  [424]: defaultL2Addresses,
-  // sepolia testnet
-  [11155111]: sepoliaAddresses,
+const allowedNetworksList = [
+  chains.zoraTestnet,
+  chains.zoraSepolia,
+  chains.zora,
+  chains.baseGoerli,
+  chains.base,
+  chains.sepolia,
+  chains.optimism,
+  chains.arbitrum,
+  chains.arbitrumSepolia,
+];
+
+// map the above to key value pairs, where value is defaultL2Addresses, unless its base, then its the baseL2Addresses:
+
+const getContractNetwork = (chainId: number) => {
+  if (chainId === chains.base.id) {
+    return baseL2Addresses;
+  }
+  if (chainId === chains.sepolia.id) {
+    return sepoliaAddresses;
+  }
+  return defaultL2Addresses;
 };
 
-const pgn = {
-  id: 424 as const,
-  name: 'PGN',
-  network: 'pgn',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Ether',
-    symbol: 'ETH',
-  },
-  rpcUrls: {
-    default: {
-      http: ['https://rpc.publicgoods.network'],
-      webSocket: ['wss://rpc.publicgoods.network'],
-    },
-    public: {
-      http: ['https://rpc.publicgoods.network'],
-      webSocket: ['wss://rpc.publicgoods.network'],
-    },
-  },
-  blockExplorers: {
-    etherscan: { name: 'Explorer', url: 'https://explorer.publicgoods.network' },
-    default: { name: 'Explorer', url: 'https://explorer.publicgoods.network' },
-  },
-}
+export const contractNetworks: ContractNetworksConfig = Object.fromEntries(
+  allowedNetworksList.map((chain) => {
+    return [chain.id, getContractNetwork(chain.id)];
+  })
+);
 
-export const allowedNetworks: { [chainId: number]: chains.Chain }= {
-  [999]: chains.zoraTestnet,
-  [999999999]: chains.zoraSepolia,
-  [424]: pgn,
-};
-
-Object.keys(contractNetworks).map((network) => {
-  if (allowedNetworks[+network]) {
-    // if already exists skip
-    return;
-  }
-  const viemChain = Object.values(chains).find((chain) => 
-    chain.id.toString() === network  );
-
-  if (!viemChain) {
-    return;
-  }
-  allowedNetworks[+network] = viemChain;
-});
+export const allowedNetworks: { [chainId: number]: chains.Chain } =
+  Object.fromEntries(
+    allowedNetworksList.map((chain) => {
+      return [chain.id, chain];
+    })
+  );
