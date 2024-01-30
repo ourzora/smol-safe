@@ -24,6 +24,7 @@
     "build": "tsc && vite build --base=/smol-safe/",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "prettier": "prettier src/ --write",
     "deploy": "yarn build && gh-pages -d dist"
   },
   "devDependencies": {
@@ -42,6 +43,7 @@
     "os-browserify": "^0.3.0",
     "parcel": "^2.9.2",
     "path-browserify": "^1.0.0",
+    "prettier": "^3.2.4",
     "stream-browserify": "^3.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.3.2",
