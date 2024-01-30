@@ -21,7 +21,7 @@ export const NetworkSwitcher = ({
         },
       ]);
     },
-    [provider]
+    [provider],
   );
 
   useEffect(() => {

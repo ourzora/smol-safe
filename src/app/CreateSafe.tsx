@@ -44,7 +44,7 @@ export function CreateSafe() {
       const address = await signer.getAddress();
       setSignerInfo({ signer, address });
     },
-    [setSignerInfo]
+    [setSignerInfo],
   );
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export function CreateSafe() {
         });
       }
     },
-    [provider, signerInfo]
+    [provider, signerInfo],
   );
 
   return (

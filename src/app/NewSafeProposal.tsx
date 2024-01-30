@@ -380,7 +380,7 @@ const EditProposal = ({
       }
       setIsEditing(false);
     },
-    [setIsEditing, setProposal]
+    [setIsEditing, setProposal],
   );
 
   const defaultActions = proposal || DEFAULT_PROPOSAL;
@@ -444,7 +444,7 @@ const EditProposal = ({
 
 export const NewSafeProposal = () => {
   const [proposal, setProposal] = useState<undefined | Proposal>(
-    DEFAULT_PROPOSAL
+    DEFAULT_PROPOSAL,
   );
   const [isEditing, setIsEditing] = useState(true);
 
@@ -462,7 +462,7 @@ export const NewSafeProposal = () => {
       setIsEditing(true);
       evt.preventDefault();
     },
-    [setIsEditing]
+    [setIsEditing],
   );
 
   return (

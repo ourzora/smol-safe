@@ -14,7 +14,7 @@ export const get = (obj: any, path: string, defValue?: any) => {
   // Find value
   const result = pathArray.reduce(
     (prevObj, key) => prevObj && prevObj[key],
-    obj
+    obj,
   );
   // If found value is undefined return default value; otherwise return the value
   return result === undefined ? defValue : result;

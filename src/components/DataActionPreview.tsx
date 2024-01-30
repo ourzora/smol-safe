@@ -29,14 +29,13 @@ export const DataActionPreview = ({ to, data }: { to: Address; data: Hex }) => {
     let json;
     try {
       const response = await fetch(
-        `https://${networkToEtherActor[Number(currentNetwork)]}.ether.actor/decode/${to}/${data}`
+        `https://${networkToEtherActor[Number(currentNetwork)]}.ether.actor/decode/${to}/${data}`,
       );
       if (!response.ok) {
         throw new Error();
       }
       json = await response.json();
     } catch (err: any) {
-
       const response = await fetch(`https://ether.actor/decode/${data}`);
       json = await response.json();
     }
