@@ -1,6 +1,6 @@
-import { useContext } from "react";
-import { CurrentNetwork } from "../app/Root";
 import { goerli, mainnet, optimism, zora, zoraTestnet } from "viem/chains";
+import { useOutletContext } from "react-router-dom";
+import { NetworkContext } from "./Contexts";
 
 export const networkToExplorer = {
   [mainnet.id]: "https://etherscan.io/",
@@ -17,7 +17,7 @@ export const AddressView = ({
   address: `0x${string}`;
   prettyName?: string;
 }) => {
-  const currentNetwork = useContext(CurrentNetwork);
+  const currentNetwork = useOutletContext<NetworkContext>().currentNetwork;
   //   const { data: ensName } = useEns({ address, enabled: !prettyName });
   const ensName = null;
 

@@ -1,6 +1,6 @@
 import { Button, View } from "reshaped";
 import { SafeInformation } from "../components/SafeInformation";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export const SafeInformationPage = () => {
   const { networkId, safeAddress } = useParams();

@@ -1,14 +1,14 @@
-import { useCallback, useContext, useEffect, useState } from "react";
-import { CurrentNetwork, WalletProviderContext } from "./Root";
+import { useCallback, useEffect, useState } from "react";
 import { Field, FieldArray, Formik } from "formik";
 import { Text, Button, FormControl, TextField, View, useToast } from "reshaped";
 import { allowedNetworks, contractNetworks } from "../chains";
 import { isAddress } from "viem";
 import { ethers } from "ethers";
 import { EthersAdapter, SafeFactory } from "@safe-global/protocol-kit";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { AbstractSigner } from "ethers";
 import { BrowserProvider } from "ethers";
+import { NetworkContext } from "../components/Contexts";
 
 function validateAddress(value: string) {
   if (!isAddress(value)) {
@@ -30,8 +30,8 @@ function validateSafeArguments(values: any) {
 }
 
 export function CreateSafe() {
-  const provider = useContext(WalletProviderContext);
-  const network = useContext(CurrentNetwork);
+  const { walletProvider: provider } = useOutletContext<NetworkContext>();
+  const { currentNetwork: network } = useOutletContext<NetworkContext>();
   const toaster = useToast();
   const navigate = useNavigate();
   const [signerInfo, setSignerInfo] = useState<
@@ -51,7 +51,7 @@ export function CreateSafe() {
     if (provider) {
       updateSignerInfo(provider);
     }
-  }, [provider]);
+  }, [provider, updateSignerInfo]);
 
   const submitCallback = useCallback(
     async (data: any) => {
@@ -86,7 +86,7 @@ export function CreateSafe() {
         });
       }
     },
-    [provider, signerInfo],
+    [navigate, network, signerInfo, toaster]
   );
 
   return (

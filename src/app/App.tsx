@@ -1,14 +1,13 @@
 import { FormControl, Button, TextField, Divider, View, Card } from "reshaped";
 import { useFormik } from "formik";
 import { isAddress } from "viem";
-import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
-import { CurrentNetwork } from "./Root";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { NetworkContext } from "../components/Contexts";
 
 function FormAddressInput() {
   const navigate = useNavigate();
 
-  const network = useContext(CurrentNetwork);
+  const { currentNetwork: network } = useOutletContext<NetworkContext>();
 
   const formik = useFormik({
     initialValues: {
@@ -53,6 +52,8 @@ function FormAddressInput() {
 export function App() {
   const navigate = useNavigate();
 
+  const chainId = useOutletContext<NetworkContext>().currentNetwork;
+
   return (
     <View padding={10} justify="space-between" gap={6} direction="column">
       <Card>
@@ -64,7 +65,7 @@ export function App() {
           <Button
             onClick={(evt) => {
               evt.preventDefault();
-              navigate("/create");
+              navigate(`/safe/${chainId}/create`);
             }}
           >
             Create a New Safe

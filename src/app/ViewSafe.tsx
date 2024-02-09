@@ -1,17 +1,11 @@
-import {
-  useState,
-  createContext,
-  useContext,
-  useEffect,
-  useCallback,
-} from "react";
-import { Outlet, useParams } from "react-router-dom";
-import { WalletProviderContext } from "./Root";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Outlet, useOutletContext, useParams } from "react-router-dom";
 import { Signer, ethers } from "ethers";
 import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
 import { contractNetworks } from "../chains";
 import { Button, View, Text } from "reshaped";
 import { Address } from "viem";
+import { NetworkContext, SafeContext, SafeInformationType } from "../components/Contexts";
 
 type SafeData = Awaited<ReturnType<typeof getSafeSDK>>;
 
@@ -35,27 +29,12 @@ async function getSafeSDK(safeAddress: string, signer: Signer) {
   return { safeSdk, safeSdk2, signer };
 }
 
-type SafeInformationType = {
-  owners: string[];
-  threshold: number;
-  chainId: number;
-  nonce: number;
-  address: Address;
-  safeSdk: Safe;
-  safeSdk2: Safe;
-};
-
-export const SafeInformationContext = createContext<
-  SafeInformationType | undefined
->(undefined);
-
 const useLoadSafeInformation = ({
   safeData,
 }: {
   safeData: SafeData | undefined;
 }) => {
   const [safeInformation, setSafeInformation] = useState<SafeInformationType>();
-
   useEffect(() => {
     if (!safeData) return;
 
@@ -79,7 +58,7 @@ const useLoadSafeInformation = ({
     };
 
     loadSafeInfo();
-  }, [safeData]);
+  }, [safeData, setSafeInformation]);
 
   return safeInformation;
 };
@@ -87,8 +66,7 @@ const useLoadSafeInformation = ({
 export const ViewSafe = () => {
   const params = useParams();
   const [safeData, setSafeData] = useState<SafeData>();
-  const providerContext = useContext(WalletProviderContext);
-  // const currentNetwork = useContext(CurrentNetwork);
+  const { walletProvider: providerContext } = useOutletContext<NetworkContext>();
 
   const setupSafe = useCallback(async () => {
     if (params.safeAddress && providerContext) {
@@ -117,17 +95,22 @@ export const ViewSafe = () => {
 
   const safeInformation = useLoadSafeInformation({ safeData });
 
+  const safeInformationContext: SafeContext |undefined = useMemo(() => {
+    if (!safeInformation) return;
+    return {
+      safeInformation
+    };
+  }, [safeInformation]);
+
   return (
-    <SafeInformationContext.Provider value={safeInformation}>
-      <View paddingTop={8} paddingBottom={8}>
-        <Text variant="featured-2">View Safe</Text>
-        <View paddingTop={4} />
-        {safeData ? (
-          <Outlet />
-        ) : (
-          <Button onClick={switchNetwork}>Switch network</Button>
-        )}
-      </View>
-    </SafeInformationContext.Provider>
+    <View paddingTop={8} paddingBottom={8}>
+      <Text variant="featured-2">View Safe</Text>
+      <View paddingTop={4} />
+      {safeInformationContext ? (
+        <Outlet context={safeInformationContext} />
+      ) : (
+        <Button onClick={switchNetwork}>Switch network</Button>
+      )}
+    </View>
   );
 };

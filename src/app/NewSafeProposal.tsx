@@ -1,22 +1,14 @@
 import { Field, FieldArray, Formik } from "formik";
 import { SafeInformation } from "../components/SafeInformation";
 import { Card, View, Text, Button, useToast } from "reshaped";
-import {
-  SyntheticEvent,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { SyntheticEvent, useCallback, useEffect, useState } from "react";
 import { Address, Hex, formatEther } from "viem";
 import { validateAddress, validateETH } from "../utils/validators";
 import { GenericField } from "../components/GenericField";
 import { DataActionPreview } from "../components/DataActionPreview";
 import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
-import { WalletProviderContext } from "./Root";
 import { ethers } from "ethers";
 import { contractNetworks } from "../chains";
-import { SafeInformationContext } from "./ViewSafe";
 import {
   DEFAULT_ACTION_ITEM,
   DEFAULT_PROPOSAL,
@@ -30,6 +22,8 @@ import {
   transformValuesToWei,
 } from "../utils/etherFormatting";
 import { BrowserProvider } from "ethers";
+import { useOutletContext } from "react-router-dom";
+import { NetworkContext, SafeContext } from "../components/Contexts";
 
 const FormActionItem = ({
   name,
@@ -140,36 +134,11 @@ const signAndExecuteTx = async ({
   return executedTxn;
 };
 
-const useSafe = ({
-  provider,
-  safeAddress,
-}: {
-  provider: BrowserProvider | null;
-  safeAddress: Address | undefined;
-}) => {
-  const [safe, setSafe] = useState<Safe>();
-
-  useEffect(() => {
-    if (!provider || !safeAddress) {
-      return;
-    }
-
-    const loadSafe = async () => {
-      const adapter = await createSafeAdapter({ provider, safeAddress });
-      setSafe(adapter);
-    };
-
-    loadSafe();
-  }, [provider, safeAddress]);
-
-  return safe;
-};
-
 const useGetSafeTxApprovals = ({ proposal }: { proposal: Proposal }) => {
-  const safeInformation = useContext(SafeInformationContext);
+  const { safeInformation } = useOutletContext<SafeContext>();
 
-  const safeSdk = safeInformation?.safeSdk;
-  const safeSdk2 = safeInformation?.safeSdk2;
+  const safeSdk = safeInformation.safeSdk;
+  const safeSdk2 = safeInformation.safeSdk2;
 
   const [approvers, setApprovers] = useState<Address[]>([]);
 
@@ -196,7 +165,7 @@ const useGetSafeTxApprovals = ({ proposal }: { proposal: Proposal }) => {
 };
 
 const useAccountAddress = () => {
-  const walletProvider = useContext(WalletProviderContext);
+  const { walletProvider } = useOutletContext<NetworkContext>();
 
   const [address, setAddress] = useState<Address>();
 
@@ -244,12 +213,8 @@ const ViewProposal = ({
   proposal: Proposal;
   handleEditClicked: (evt: SyntheticEvent) => void;
 }) => {
-  const safeInformation = useContext(SafeInformationContext);
-  const walletProvider = useContext(WalletProviderContext);
-  const safe = useSafe({
-    provider: walletProvider,
-    safeAddress: safeInformation?.address,
-  });
+  const { safeInformation } = useOutletContext<SafeContext>();
+  const safe = safeInformation.safeSdk;
 
   const toaster = useToast();
 
@@ -380,7 +345,7 @@ const EditProposal = ({
       }
       setIsEditing(false);
     },
-    [setIsEditing, setProposal],
+    [proposal, setIsEditing, setProposal, setProposalParams]
   );
 
   const defaultActions = proposal || DEFAULT_PROPOSAL;

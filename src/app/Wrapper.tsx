@@ -14,12 +14,12 @@ const router = createHashRouter([
     Component: Root,
     children: [
       {
-        path: "/",
+        path: "/safe/:networkId",
         index: true,
         Component: App,
       },
       {
-        path: "/create",
+        path: "/safe/:networkId/create",
         Component: CreateSafe,
       },
       {

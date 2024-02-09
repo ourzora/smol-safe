@@ -1,18 +1,17 @@
 import { ethers } from "ethers";
-import { createContext, useCallback, useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Outlet, useParams } from "react-router-dom";
 import { Button, View } from "reshaped";
 import { NetworkSwitcher } from "../components/NetworkSwitcher";
 import { BrowserProvider } from "ethers";
-
-export const WalletProviderContext =
-  createContext<null | ethers.BrowserProvider>(null);
-export const CurrentNetwork = createContext(0);
+import { NetworkContext } from "../components/Contexts";
 
 export const Root = () => {
   const [provider, setProvider] = useState<
     ethers.BrowserProvider | undefined
   >();
+  const networkIdFromRoute = useParams().networkId;
+
   const [currentNetwork, setCurrentNetwork] = useState<number>(0);
 
   const connectMetamask = useCallback(async () => {
@@ -43,7 +42,29 @@ export const Root = () => {
     connectMetamask();
   }, [connectMetamask]);
 
-  if (!provider) {
+  const networkContext: NetworkContext | undefined = useMemo(() => {
+    if (!provider) return;
+
+    return {
+      walletProvider: provider,
+      currentNetwork,
+    };
+  }, [provider, currentNetwork]);
+
+  useEffect(() => {
+    if (!networkIdFromRoute) return;
+    if (currentNetwork !== Number(networkIdFromRoute)) {
+      provider?.send("wallet_switchEthereumChain", [
+        {
+          chainId: `0x${parseInt(networkIdFromRoute).toString(16)}`,
+        },
+      ]);
+
+      setCurrentNetwork(Number(networkIdFromRoute));
+    }
+  }, [currentNetwork, networkIdFromRoute, setCurrentNetwork, provider]);
+
+  if (!networkContext) {
     return (
       <View padding={10} justify="space-between" gap={6} direction="column">
         <Button onClick={connectMetamask}>Connect Web3</Button>
@@ -52,13 +73,11 @@ export const Root = () => {
   }
 
   return (
-    <WalletProviderContext.Provider value={provider}>
-      <CurrentNetwork.Provider value={currentNetwork}>
-        <br />
-        <br />
-        <NetworkSwitcher {...{ currentNetwork, setCurrentNetwork, provider }} />
-        <Outlet />
-      </CurrentNetwork.Provider>
-    </WalletProviderContext.Provider>
+    <>
+      <br />
+      <br />
+      <NetworkSwitcher currentNetwork={networkIdFromRoute} />
+      <Outlet context={networkContext} />
+    </>
   );
 };
