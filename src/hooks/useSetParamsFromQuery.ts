@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Proposal } from "../schemas/proposal";
+import { queryKeys } from "./useLoadProposalFromQuery";
 
 export const useSetParamsFromQuery = () => {
   const [_, setParams] = useSearchParams();
@@ -12,9 +13,9 @@ export const useSetParamsFromQuery = () => {
       }
       console.log("setting params", proposal.actions);
       setParams({
-        targets: proposal.actions!.map((action) => action.to).join("|"),
-        data: proposal.actions!.map((action) => action.data).join("|"),
-        value: proposal.actions!.map((action) => action.value).join("|"),
+        [queryKeys.targets]: proposal.actions!.map((action) => action.to).join("|"),
+        [queryKeys.calldatas]: proposal.actions!.map((action) => action.data).join("|"),
+        [queryKeys.values]: proposal.actions!.map((action) => action.value).join("|"),
       });
     },
     [setParams],
