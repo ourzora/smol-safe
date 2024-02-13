@@ -4,8 +4,8 @@
   "license": "MIT",
   "type": "module",
   "dependencies": {
-    "@safe-global/protocol-kit": "^2.0.0",
     "@safe-global/safe-deployments": "^1.33.0",
+    "@safe-global/protocol-kit": "^3.0.0",
     "@zoralabs/zorb": "^0.1.0",
     "ethers": "^6.7.1",
     "formik": "^2.4.5",
