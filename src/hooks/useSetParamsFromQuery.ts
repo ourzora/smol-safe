@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Proposal } from "../schemas/proposal";
 import { queryKeys } from "./useLoadProposalFromQuery";
 
-export const useSetParamsFromQuery = () => {
+export const useRedirectToProposalWithNewParams = () => {
   const [_, setParams] = useSearchParams();
 
   return useCallback(
