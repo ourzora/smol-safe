@@ -15,7 +15,7 @@ import {
   Proposal,
   proposalSchema,
 } from "../schemas/proposal";
-import { useSetParamsFromQuery } from "../hooks/useSetParamsFromQuery";
+import { useRedirectToProposalWithNewParams } from "../hooks/useSetParamsFromQuery";
 import { useLoadProposalFromQuery } from "../hooks/useLoadProposalFromQuery";
 import {
   transformValuesFromWei,
@@ -329,23 +329,20 @@ const ViewProposal = ({
 
 const EditProposal = ({
   proposal,
-  setProposal: setProposal,
-  setIsEditing,
 }: {
   proposal: Proposal | undefined;
   setProposal: (result: Proposal) => void;
   setIsEditing: (editing: boolean) => void;
 }) => {
-  const setProposalParams = useSetParamsFromQuery();
+  const redirectToEditedProposal = useRedirectToProposalWithNewParams();
   const onSubmit = useCallback(
     (result: Proposal) => {
-      setProposal(transformValuesToWei(result));
+      const proposal = transformValuesToWei(result);
       if (proposal) {
-        setProposalParams(proposal);
+        redirectToEditedProposal(proposal);
       }
-      setIsEditing(false);
     },
-    [proposal, setIsEditing, setProposal, setProposalParams],
+    [redirectToEditedProposal]
   );
 
   const defaultActions = proposal || DEFAULT_PROPOSAL;

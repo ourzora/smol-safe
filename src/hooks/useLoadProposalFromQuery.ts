@@ -2,14 +2,20 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Proposal } from "../schemas/proposal";
 
+export const queryKeys = {
+  targets: "targets",
+  calldatas: "calldatas",
+  values: "values"
+};
+
 export const useLoadProposalFromQuery = () => {
   const [proposal, setProposal] = useState<undefined | Proposal>();
   const [params] = useSearchParams();
 
   useEffect(() => {
-    const targets = params.get("targets")?.split("|");
-    const calldatas = params.get("calldatas")?.split("|");
-    const values = params.get("values")?.split("|");
+    const targets = params.get(queryKeys.targets)?.split("|");
+    const calldatas = params.get(queryKeys.calldatas)?.split("|");
+    const values = params.get(queryKeys.values)?.split("|");
     if (targets && calldatas) {
       // ensure the 3 lengths are the same.  check if values also has the same length if its not empty
       // check the inverse of the above, if inverse is true, return:
