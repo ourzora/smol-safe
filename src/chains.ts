@@ -9,14 +9,42 @@ const defaultL2Addresses = {
   fallbackHandlerAddress: "0x1AC114C2099aFAf5261731655Dc6c306bFcd4Dbd",
   createCallAddress: "0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4",
   signMessageLibAddress: "0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2",
-  safeSingletonAddress: "0x",
+  safeSingletonAddress: "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
   simulateTxAccessorAddress: "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da",
 };
 
 // Example how to add new networks before they are merged and released from `safe-global/safe-deployments` package.
 export const contractNetworks: ContractNetworksConfig = {
   [`${chains.zoraSepolia.id}`]: defaultL2Addresses,
+  [`${chains.blastSepolia.id}`]: defaultL2Addresses,
+  [`${chains.optimismSepolia.id}`]: defaultL2Addresses,
 };
+
+// const blastSepolia = {
+//   id: 168587773 as const,
+//   name: "Blast Sepolia",
+//   network: "blast-sepolia",
+//   nativeCurrency: {
+//     decimals: 18,
+//     name: "Ether",
+//     symbol: "ETH",
+//   },
+//   rpcUrls: {
+//     default: {
+//       http: ["https://sepolia.blast.io"],
+//     },
+//     public: {
+//       http: ["https://sepolia.blast.io"],
+//     },
+//   },
+//   blockExplorers: {
+//     etherscan: {
+//       name: "Explorer",
+//       url: "https://testnet.blastscan.io",
+//     },
+//     default: { name: "Explorer", url: "https://testnet.blastscan.io" },
+//   },
+// };
 
 export const allowedNetworks: { [chainId: number]: chains.Chain } = {
   [chains.zora.id]: chains.zora,
@@ -31,6 +59,7 @@ export const allowedNetworks: { [chainId: number]: chains.Chain } = {
   [chains.sepolia.id]: chains.sepolia,
   [chains.optimism.id]: chains.optimism,
   [chains.optimismSepolia.id]: chains.optimismSepolia,
+  [chains.blastSepolia.id]: chains.blastSepolia,
 };
 
 Object.keys(contractNetworks).map((network) => {
@@ -39,7 +68,7 @@ Object.keys(contractNetworks).map((network) => {
     return;
   }
   const viemChain = Object.values(chains).find(
-    (chain) => chain.id.toString() === network,
+    (chain) => chain.id.toString() === network
   );
 
   if (!viemChain) {

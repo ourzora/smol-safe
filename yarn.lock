@@ -1224,10 +1224,17 @@
     web3-core "^1.10.3"
     web3-utils "^1.10.3"
 
-"@safe-global/safe-deployments@^1.28.0", "@safe-global/safe-deployments@^1.32.0":
+"@safe-global/safe-deployments@^1.28.0":
   version "1.32.0"
   resolved "https://registry.yarnpkg.com/@safe-global/safe-deployments/-/safe-deployments-1.32.0.tgz#3632194d883aa07bd446a6e530e825ba022c9b76"
   integrity sha512-7RXmnBrUzJ9+Iat74yx3Gel0kygmsaWjJhqr+0Fy8mkP5ly/6dTZ/2ize1pv3j9Yal04NTOqXbaJG4JnbTANQw==
+  dependencies:
+    semver "^7.3.7"
+
+"@safe-global/safe-deployments@^1.33.0":
+  version "1.33.0"
+  resolved "https://registry.yarnpkg.com/@safe-global/safe-deployments/-/safe-deployments-1.33.0.tgz#5fc33354e752d02fa06b3ab1c1060ba23f484038"
+  integrity sha512-G9qGMsha6idMnDuk98dE//inQL09w97hcQ5ZTdSWIHCzJ9mFdN0K4DH2afjZOwdt+Y4g8gZmY3z+kR38MPEToQ==
   dependencies:
     semver "^7.3.7"
 
@@ -1685,10 +1692,10 @@
     "@types/tinycolor2" "^1.4.3"
     tinycolor2 "^1.4.2"
 
-abitype@0.9.8:
-  version "0.9.8"
-  resolved "https://registry.yarnpkg.com/abitype/-/abitype-0.9.8.tgz#1f120b6b717459deafd213dfbf3a3dd1bf10ae8c"
-  integrity sha512-puLifILdm+8sjyss4S+fsUN09obiT1g2YW6CtcQF+QDzxR0euzgEB29MZujC6zMk2a6SVmtttq1fc6+YFA7WYQ==
+abitype@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/abitype/-/abitype-1.0.0.tgz#237176dace81d90d018bebf3a45cb42f2a2d9e97"
+  integrity sha512-NMeMah//6bJ56H5XRj8QCV4AwuW6hB6zqz2LnhhLdcWVQOsXki6/Pn3APeqxCma62nXIcmZWdu1DlHWS74umVQ==
 
 abortcontroller-polyfill@^1.1.9, abortcontroller-polyfill@^1.7.5:
   version "1.7.5"
@@ -5783,17 +5790,17 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-viem@^1.19.5:
-  version "1.19.5"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-1.19.5.tgz#e1c9d52f889ad870e3533afa96e000da3004a7b7"
-  integrity sha512-lcWP9ErivUKVRpnDgI6mly27iWibJN1jZW2yUGuwU2CjfVHs7DJCyA5ityL+n/B+Oss4bllzQkWtJiBAHqaX2g==
+viem@^2.7.16:
+  version "2.7.16"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.7.16.tgz#99e66bbec661b2284bc32061474f20a90381bdcb"
+  integrity sha512-yOPa9yaoJUm44m0Qe3ugHnkHol3QQlFxN3jT+bq+lQip7X7cWdPfmguyfLWX2viCXcmYZUDiQdeFbkPW9lw11Q==
   dependencies:
     "@adraffy/ens-normalize" "1.10.0"
     "@noble/curves" "1.2.0"
     "@noble/hashes" "1.3.2"
     "@scure/bip32" "1.3.2"
     "@scure/bip39" "1.2.1"
-    abitype "0.9.8"
+    abitype "1.0.0"
     isows "1.0.3"
     ws "8.13.0"
 
