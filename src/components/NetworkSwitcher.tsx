@@ -9,16 +9,17 @@ export const NetworkSwitcher = ({
 }: {
   currentNetwork: string | undefined;
 }) => {
-  const [currentNetworkValue, setCurrentNetworkValue] = useState(currentNetwork);
+  const [currentNetworkValue, setCurrentNetworkValue] =
+    useState(currentNetwork);
   const navigate = useNavigate();
   const changeNetwork = useCallback(
     (e: { value: string }) => {
-      const networkId = e.value; 
+      const networkId = e.value;
       setCurrentNetworkValue(networkId);
 
       navigate(`/safe/${networkId}`);
     },
-    [navigate]
+    [navigate],
   );
 
   return (

@@ -5,7 +5,11 @@ import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
 import { contractNetworks } from "../chains";
 import { Button, View, Text } from "reshaped";
 import { Address } from "viem";
-import { NetworkContext, SafeContext, SafeInformationType } from "../components/Contexts";
+import {
+  NetworkContext,
+  SafeContext,
+  SafeInformationType,
+} from "../components/Contexts";
 
 type SafeData = Awaited<ReturnType<typeof getSafeSDK>>;
 
@@ -66,7 +70,8 @@ const useLoadSafeInformation = ({
 export const ViewSafe = () => {
   const params = useParams();
   const [safeData, setSafeData] = useState<SafeData>();
-  const { walletProvider: providerContext } = useOutletContext<NetworkContext>();
+  const { walletProvider: providerContext } =
+    useOutletContext<NetworkContext>();
 
   const setupSafe = useCallback(async () => {
     if (params.safeAddress && providerContext) {
@@ -95,10 +100,10 @@ export const ViewSafe = () => {
 
   const safeInformation = useLoadSafeInformation({ safeData });
 
-  const safeInformationContext: SafeContext |undefined = useMemo(() => {
+  const safeInformationContext: SafeContext | undefined = useMemo(() => {
     if (!safeInformation) return;
     return {
-      safeInformation
+      safeInformation,
     };
   }, [safeInformation]);
 

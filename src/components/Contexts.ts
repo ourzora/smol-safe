@@ -15,7 +15,6 @@ export type SafeInformationType = {
 export interface NetworkContext {
   walletProvider: BrowserProvider;
   currentNetwork: number;
-  
 }
 
 export interface SafeContext {

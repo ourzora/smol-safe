@@ -86,7 +86,7 @@ export function CreateSafe() {
         });
       }
     },
-    [navigate, network, signerInfo, toaster]
+    [navigate, network, signerInfo, toaster],
   );
 
   return (
