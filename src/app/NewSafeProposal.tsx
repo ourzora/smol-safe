@@ -345,7 +345,7 @@ const EditProposal = ({
       }
       setIsEditing(false);
     },
-    [proposal, setIsEditing, setProposal, setProposalParams]
+    [proposal, setIsEditing, setProposal, setProposalParams],
   );
 
   const defaultActions = proposal || DEFAULT_PROPOSAL;
