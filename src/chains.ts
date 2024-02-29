@@ -13,38 +13,39 @@ const defaultL2Addresses = {
   simulateTxAccessorAddress: "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da",
 };
 
+const blast = {
+  id: 81457 as const,
+  name: "Blast",
+  network: "blast",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Ether",
+    symbol: "ETH",
+  },
+  rpcUrls: {
+    default: {
+      http: [],
+    },
+    public: {
+      http: [],
+    },
+  },
+  blockExplorers: {
+    etherscan: {
+      name: "Explorer",
+      url: "https://blastscan.io",
+    },
+    default: { name: "Explorer", url: "https://blastscan.io" },
+  },
+};
+
 // Example how to add new networks before they are merged and released from `safe-global/safe-deployments` package.
 export const contractNetworks: ContractNetworksConfig = {
   [`${chains.zoraSepolia.id}`]: defaultL2Addresses,
   [`${chains.blastSepolia.id}`]: defaultL2Addresses,
   [`${chains.optimismSepolia.id}`]: defaultL2Addresses,
+  [`${blast.id}`]: defaultL2Addresses,
 };
-
-// const blastSepolia = {
-//   id: 168587773 as const,
-//   name: "Blast Sepolia",
-//   network: "blast-sepolia",
-//   nativeCurrency: {
-//     decimals: 18,
-//     name: "Ether",
-//     symbol: "ETH",
-//   },
-//   rpcUrls: {
-//     default: {
-//       http: ["https://sepolia.blast.io"],
-//     },
-//     public: {
-//       http: ["https://sepolia.blast.io"],
-//     },
-//   },
-//   blockExplorers: {
-//     etherscan: {
-//       name: "Explorer",
-//       url: "https://testnet.blastscan.io",
-//     },
-//     default: { name: "Explorer", url: "https://testnet.blastscan.io" },
-//   },
-// };
 
 export const allowedNetworks: { [chainId: number]: chains.Chain } = {
   [chains.zora.id]: chains.zora,
@@ -60,6 +61,7 @@ export const allowedNetworks: { [chainId: number]: chains.Chain } = {
   [chains.optimism.id]: chains.optimism,
   [chains.optimismSepolia.id]: chains.optimismSepolia,
   [chains.blastSepolia.id]: chains.blastSepolia,
+  [blast.id]: blast,
 };
 
 Object.keys(contractNetworks).map((network) => {
