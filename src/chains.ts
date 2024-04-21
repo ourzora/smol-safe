@@ -13,45 +13,12 @@ const defaultL2Addresses = {
   simulateTxAccessorAddress: "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da",
 };
 
-<<<<<<< HEAD
-const blast = {
-  id: 81457 as const,
-  name: "Blast",
-  network: "blast",
-  nativeCurrency: {
-    decimals: 18,
-    name: "Ether",
-    symbol: "ETH",
-  },
-  rpcUrls: {
-    default: {
-      http: [],
-    },
-    public: {
-      http: [],
-    },
-  },
-  blockExplorers: {
-    etherscan: {
-      name: "Explorer",
-      url: "https://blastscan.io",
-    },
-    default: { name: "Explorer", url: "https://blastscan.io" },
-  },
-=======
-// Example how to add new networks before they are merged and released from `safe-global/safe-deployments` package.
-export const contractNetworks: ContractNetworksConfig = {
-  // ZORA sepolia
-  [`${chains.zoraSepolia.id}`]: defaultL2Addresses,
->>>>>>> 084a40e (Fix zora sepolia safe connection)
-};
-
 // Example how to add new networks before they are merged and released from `safe-global/safe-deployments` package.
 export const contractNetworks: ContractNetworksConfig = {
   [`${chains.zoraSepolia.id}`]: defaultL2Addresses,
   [`${chains.blastSepolia.id}`]: defaultL2Addresses,
   [`${chains.optimismSepolia.id}`]: defaultL2Addresses,
-  [`${blast.id}`]: defaultL2Addresses,
+  [`${chains.blast.id}`]: defaultL2Addresses,
 };
 
 export const allowedNetworks: { [chainId: number]: chains.Chain } = {
