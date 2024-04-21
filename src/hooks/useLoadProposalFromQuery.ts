@@ -14,7 +14,7 @@ export const useLoadProposalFromQuery = () => {
   const [params] = useSearchParams();
 
   useEffect(() => {
-    const targets = params.get(queryKeys[targets])?.split("|");
+    const targets = params.get(queryKeys["targets"])?.split("|");
     const calldatas = params.get(queryKeys["calldatas"])?.split("|");
     const values = params.get(queryKeys["values"])?.split("|");
     const nonce = params.get(queryKeys["nonce"]);
@@ -38,7 +38,7 @@ export const useLoadProposalFromQuery = () => {
 
       console.log({ actions, txt: "setting proposal" });
 
-      setProposal({ actions, ...(nonce ? {[queryKeys.nonce]: nonce} : {}) });
+      setProposal({ actions, ...(nonce ? { [queryKeys.nonce]: nonce } : {}) });
     }
   }, [params, setProposal]);
 
