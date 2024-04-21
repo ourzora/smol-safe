@@ -11,11 +11,15 @@ export const useRedirectToProposalWithNewParams = () => {
       if (!proposal.actions?.length) {
         return;
       }
-      console.log("setting params", proposal.actions);
       setParams({
         [queryKeys.targets]: proposal.actions!.map((action) => action.to).join("|"),
         [queryKeys.calldatas]: proposal.actions!.map((action) => action.data).join("|"),
         [queryKeys.values]: proposal.actions!.map((action) => action.value).join("|"),
+        ...(proposal.nonce
+          ? {
+              [queryKeys.nonce]: proposal.nonce.toString(),
+            }
+          : {}),
       });
     },
     [setParams],
