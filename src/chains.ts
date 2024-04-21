@@ -35,7 +35,7 @@ export const allowedNetworks: { [chainId: number]: chains.Chain } = {
   [chains.optimism.id]: chains.optimism,
   [chains.optimismSepolia.id]: chains.optimismSepolia,
   [chains.blastSepolia.id]: chains.blastSepolia,
-  [blast.id]: blast,
+  [chains.blast.id]: chains.blast,
 };
 
 Object.keys(contractNetworks).map((network) => {
