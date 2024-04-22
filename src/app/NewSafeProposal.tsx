@@ -1,35 +1,26 @@
 import { Field, FieldArray, Formik } from "formik";
 import { SafeInformation } from "../components/SafeInformation";
 import { Card, View, Text, Button, useToast } from "reshaped";
-import {
-  SyntheticEvent,
-  createContext,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { SyntheticEvent, useCallback, useEffect, useState } from "react";
 import { Address, Hex, formatEther } from "viem";
 import { validateAddress, validateETH } from "../utils/validators";
 import { GenericField } from "../components/GenericField";
 import { DataActionPreview } from "../components/DataActionPreview";
-import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
-import { ethers } from "ethers";
-import { contractNetworks } from "../chains";
+import Safe from "@safe-global/protocol-kit";
 import {
   DEFAULT_ACTION_ITEM,
   DEFAULT_PROPOSAL,
   Proposal,
   proposalSchema,
 } from "../schemas/proposal";
-import { useRedirectToProposalWithNewParams } from "../hooks/useSetParamsFromQuery";
 import { useLoadProposalFromQuery } from "../hooks/useLoadProposalFromQuery";
 import {
   transformValuesFromWei,
   transformValuesToWei,
 } from "../utils/etherFormatting";
-import { BrowserProvider } from "ethers";
 import { useOutletContext } from "react-router-dom";
 import { NetworkContext, SafeContext } from "../components/Contexts";
+import { useUpdateProposal } from "../hooks/useUpdateProposalViaQuery";
 
 const FormActionItem = ({
   name,
@@ -60,24 +51,6 @@ const FormActionItem = ({
       <Field name={`${name}.data`}>{GenericField({ label: "Data" })}</Field>
     </View>
   );
-};
-
-const createSafeAdapter = async ({
-  provider,
-  safeAddress,
-}: {
-  provider: BrowserProvider;
-  safeAddress: Address;
-}) => {
-  const ethAdapter = new EthersAdapter({
-    ethers,
-    signerOrProvider: await provider!.getSigner(),
-  });
-  return await Safe.create({
-    ethAdapter,
-    safeAddress,
-    contractNetworks,
-  });
 };
 
 const createSafeTransaction = async ({
@@ -335,20 +308,19 @@ const ViewProposal = ({
 
 const EditProposal = ({
   proposal,
+  setProposal,
 }: {
   proposal: Proposal | undefined;
-  setProposal: (result: Proposal) => void;
-  setIsEditing: (editing: boolean) => void;
+  setProposal: (proposal: Proposal) => void;
 }) => {
-  const redirectToEditedProposal = useRedirectToProposalWithNewParams();
   const onSubmit = useCallback(
     (result: Proposal) => {
       const proposal = transformValuesToWei(result);
       if (proposal) {
-        redirectToEditedProposal(proposal);
+        setProposal(proposal);
       }
     },
-    [redirectToEditedProposal]
+    [setProposal]
   );
 
   const defaultActions = proposal || DEFAULT_PROPOSAL;
@@ -410,11 +382,9 @@ const EditProposal = ({
   );
 };
 
-export const ProposalContext = createContext<Proposal | undefined>(undefined);
-
 export const NewSafeProposal = () => {
   const [proposal, setProposal] = useState<undefined | Proposal>(
-    DEFAULT_PROPOSAL,
+    DEFAULT_PROPOSAL
   );
   const [isEditing, setIsEditing] = useState(true);
 
@@ -432,28 +402,27 @@ export const NewSafeProposal = () => {
       setIsEditing(true);
       evt.preventDefault();
     },
-    [setIsEditing],
+    [setIsEditing]
   );
 
+  const updateProposal = useUpdateProposal({ proposal });
+
   return (
-    <ProposalContext.Provider value={proposal}>
-      <View paddingTop={4} paddingBottom={8} gap={8}>
-        <SafeInformation>
-          {isEditing && (
-            <EditProposal
-              proposal={proposal}
-              setProposal={setProposal}
-              setIsEditing={setIsEditing}
-            />
-          )}
-          {!isEditing && proposal && (
-            <ViewProposal
-              proposal={proposal}
-              handleEditClicked={handleEditClicked}
-            />
-          )}
-        </SafeInformation>
-      </View>
-    </ProposalContext.Provider>
+    <View paddingTop={4} paddingBottom={8} gap={8}>
+      <SafeInformation updateProposal={updateProposal}>
+        {isEditing && (
+          <EditProposal
+            proposal={proposal}
+            setProposal={updateProposal.replace}
+          />
+        )}
+        {!isEditing && proposal && (
+          <ViewProposal
+            proposal={proposal}
+            handleEditClicked={handleEditClicked}
+          />
+        )}
+      </SafeInformation>
+    </View>
   );
 };

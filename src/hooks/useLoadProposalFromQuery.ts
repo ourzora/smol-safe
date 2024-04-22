@@ -38,7 +38,12 @@ export const useLoadProposalFromQuery = () => {
 
       console.log({ actions, txt: "setting proposal" });
 
-      setProposal({ actions, ...(nonce ? { [queryKeys.nonce]: nonce } : {}) });
+      const proposal: Proposal = {
+        actions,
+        ...(nonce ? { nonce: parseInt(nonce) } : {}),
+      };
+
+      setProposal(proposal);
     }
   }, [params, setProposal]);
 

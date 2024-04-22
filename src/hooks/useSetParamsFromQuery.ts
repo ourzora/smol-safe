@@ -4,7 +4,7 @@ import { Proposal } from "../schemas/proposal";
 import { queryKeys } from "./useLoadProposalFromQuery";
 
 export const useRedirectToProposalWithNewParams = () => {
-  const [_, setParams] = useSearchParams();
+  const [, setParams] = useSearchParams();
 
   return useCallback(
     (proposal: Proposal) => {
@@ -12,9 +12,15 @@ export const useRedirectToProposalWithNewParams = () => {
         return;
       }
       setParams({
-        [queryKeys.targets]: proposal.actions!.map((action) => action.to).join("|"),
-        [queryKeys.calldatas]: proposal.actions!.map((action) => action.data).join("|"),
-        [queryKeys.values]: proposal.actions!.map((action) => action.value).join("|"),
+        [queryKeys.targets]: proposal
+          .actions!.map((action) => action.to)
+          .join("|"),
+        [queryKeys.calldatas]: proposal
+          .actions!.map((action) => action.data)
+          .join("|"),
+        [queryKeys.values]: proposal
+          .actions!.map((action) => action.value)
+          .join("|"),
         ...(proposal.nonce
           ? {
               [queryKeys.nonce]: proposal.nonce.toString(),
@@ -22,6 +28,6 @@ export const useRedirectToProposalWithNewParams = () => {
           : {}),
       });
     },
-    [setParams],
+    [setParams]
   );
 };
