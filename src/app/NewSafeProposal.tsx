@@ -20,7 +20,7 @@ import {
 } from "../utils/etherFormatting";
 import { useOutletContext } from "react-router-dom";
 import { NetworkContext, SafeContext } from "../components/Contexts";
-import { useUpdateProposal } from "../hooks/useUpdateProposalViaQuery";
+import { useUpdateProposalInQuery } from "../hooks/useUpdateProposalViaQuery";
 
 const FormActionItem = ({
   name,
@@ -383,19 +383,16 @@ const EditProposal = ({
 };
 
 export const NewSafeProposal = () => {
-  const [proposal, setProposal] = useState<undefined | Proposal>(
-    DEFAULT_PROPOSAL
-  );
   const [isEditing, setIsEditing] = useState(true);
 
-  const proposalFromQuery = useLoadProposalFromQuery();
+  const proposal = useLoadProposalFromQuery();
+  const { addAction, replace } = useUpdateProposalInQuery({ proposal });
 
   useEffect(() => {
-    if (proposalFromQuery) {
-      setProposal(proposalFromQuery);
+    if (proposal) {
       setIsEditing(false);
     }
-  }, [proposalFromQuery]);
+  }, [proposal]);
 
   const handleEditClicked = useCallback(
     (evt: SyntheticEvent) => {
@@ -405,16 +402,11 @@ export const NewSafeProposal = () => {
     [setIsEditing]
   );
 
-  const updateProposal = useUpdateProposal({ proposal });
-
   return (
     <View paddingTop={4} paddingBottom={8} gap={8}>
-      <SafeInformation updateProposal={updateProposal}>
+      <SafeInformation addAction={addAction}>
         {isEditing && (
-          <EditProposal
-            proposal={proposal}
-            setProposal={updateProposal.replace}
-          />
+          <EditProposal proposal={proposal} setProposal={replace} />
         )}
         {!isEditing && proposal && (
           <ViewProposal

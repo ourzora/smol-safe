@@ -2,11 +2,15 @@ import { useCallback } from "react";
 import { Proposal } from "../schemas/proposal";
 import { useRedirectToProposalWithNewParams } from "./useSetParamsFromQuery";
 
+export type AddAction = (
+  newAction: NonNullable<Proposal["actions"]>[0]
+) => void;
+
 export type UpdateProposal = {
-  addAction: (newAction: NonNullable<Proposal["actions"]>[0]) => void;
+  addAction: AddAction;
   replace: (proposal: Proposal) => void;
 };
-export const useUpdateProposal = ({
+export const useUpdateProposalInQuery = ({
   proposal,
 }: {
   proposal: Proposal | undefined;

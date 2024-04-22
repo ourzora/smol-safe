@@ -8,7 +8,7 @@ import { yupAddress } from "../utils/validators";
 import { number, object } from "yup";
 import { useOutletContext } from "react-router-dom";
 import { SafeContext } from "./Contexts";
-import { UpdateProposal } from "../hooks/useUpdateProposalViaQuery";
+import { AddAction } from "../hooks/useUpdateProposalViaQuery";
 
 export type OwnerAction =
   | undefined
@@ -43,10 +43,10 @@ const ButtonPanel = ({
 
 const AddOwnerModalContent = ({
   onClose,
-  updateProposal: { addAction },
+  addAction,
 }: {
   onClose: () => void;
-  updateProposal: UpdateProposal;
+  addAction: AddAction;
 }) => {
   const { safeInformation } = useOutletContext<SafeContext>();
   const toast = useToast();
@@ -99,11 +99,11 @@ const AddOwnerModalContent = ({
 const RemoveOwnerModalContent = ({
   onClose,
   target,
-  updateProposal: { addAction },
+  addAction,
 }: {
   onClose: () => void;
   target: string;
-  updateProposal: UpdateProposal;
+  addAction: AddAction;
 }) => {
   const { safeInformation } = useOutletContext<SafeContext>();
   const toaster = useToast();
@@ -162,11 +162,11 @@ const RemoveOwnerModalContent = ({
 export const SetOwnerModal = ({
   action,
   onClose,
-  updatedProposal,
+  addAction,
 }: {
   action: OwnerAction;
   onClose: () => void;
-  updatedProposal: UpdateProposal;
+  addAction: AddAction;
 }) => {
   return (
     <Modal active={!!action} onClose={onClose}>
@@ -174,14 +174,11 @@ export const SetOwnerModal = ({
         <RemoveOwnerModalContent
           onClose={onClose}
           target={action.address}
-          updateProposal={updatedProposal}
+          addAction={addAction}
         />
       )}
       {action?.type === "add" && (
-        <AddOwnerModalContent
-          onClose={onClose}
-          updateProposal={updatedProposal}
-        />
+        <AddOwnerModalContent onClose={onClose} addAction={addAction} />
       )}
     </Modal>
   );
