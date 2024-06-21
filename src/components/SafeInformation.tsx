@@ -7,6 +7,7 @@ import { AddressView } from "../components/AddressView";
 import { OwnerAction, SetOwnerModal } from "../components/SetOwnerModal";
 import { useOutletContext } from "react-router-dom";
 import { SafeContext } from "./Contexts";
+import { AddAction } from "../hooks/useUpdateProposalViaQuery";
 
 const SafeInformationItem = ({
   title,
@@ -27,8 +28,10 @@ const SafeInformationItem = ({
 
 export const SafeInformation = ({
   children,
+  addAction,
 }: {
   children?: React.ReactNode;
+  addAction: AddAction;
 }) => {
   const [ownerAction, setOwnerAction] = useState<OwnerAction>();
 
@@ -42,6 +45,7 @@ export const SafeInformation = ({
             setOwnerAction(undefined);
           }}
           action={ownerAction}
+          addAction={addAction}
         />
       )}
       <Card>

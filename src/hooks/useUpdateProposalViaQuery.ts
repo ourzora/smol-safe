@@ -1,19 +1,34 @@
-import { useCallback, useContext } from "react";
+import { useCallback } from "react";
 import { Proposal } from "../schemas/proposal";
-import { ProposalContext } from "../app/NewSafeProposal";
 import { useRedirectToProposalWithNewParams } from "./useSetParamsFromQuery";
 
-export const useUpdateProposalViaQuery = () => {
-  const setParams = useRedirectToProposalWithNewParams();
-  const proposal = useContext(ProposalContext);
+export type AddAction = (
+  newAction: NonNullable<Proposal["actions"]>[0]
+) => void;
 
-  return useCallback(
+export type UpdateProposal = {
+  addAction: AddAction;
+  replace: (proposal: Proposal) => void;
+};
+export const useUpdateProposalInQuery = ({
+  proposal,
+}: {
+  proposal: Proposal | undefined;
+}): UpdateProposal => {
+  const setParams = useRedirectToProposalWithNewParams();
+
+  const addAction = useCallback(
     (newAction: NonNullable<Proposal["actions"]>[0]) => {
       setParams({
         actions: [...(proposal?.actions || []), newAction],
         nonce: proposal?.nonce,
       });
     },
-    [proposal, setParams],
+    [proposal, setParams]
   );
+
+  return {
+    addAction,
+    replace: setParams,
+  };
 };

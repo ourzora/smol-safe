@@ -1,4 +1,4 @@
-import { SyntheticEvent, useContext } from "react";
+import { SyntheticEvent } from "react";
 import { Button, Modal, Text, View, useToast } from "reshaped";
 import { AddressView } from "./AddressView";
 import { Address } from "viem";
@@ -8,8 +8,7 @@ import { yupAddress } from "../utils/validators";
 import { number, object } from "yup";
 import { useOutletContext } from "react-router-dom";
 import { SafeContext } from "./Contexts";
-import { ProposalContext } from "../app/NewSafeProposal";
-import { useUpdateProposalViaQuery } from "../hooks/useUpdateProposalViaQuery";
+import { AddAction } from "../hooks/useUpdateProposalViaQuery";
 
 export type OwnerAction =
   | undefined
@@ -42,11 +41,15 @@ const ButtonPanel = ({
   </View>
 );
 
-const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
+const AddOwnerModalContent = ({
+  onClose,
+  addAction,
+}: {
+  onClose: () => void;
+  addAction: AddAction;
+}) => {
   const { safeInformation } = useOutletContext<SafeContext>();
   const toast = useToast();
-  const updateProposalQuery = useUpdateProposalViaQuery();
-  const currentProposal = useContext(ProposalContext);
 
   return (
     <Formik
@@ -62,7 +65,7 @@ const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
             ownerAddress: address,
             threshold: threshold,
           });
-          updateProposalQuery({
+          addAction({
             data: addOwnerTx.data.data,
             value: "0",
             to: safeInformation.address,
@@ -96,12 +99,13 @@ const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
 const RemoveOwnerModalContent = ({
   onClose,
   target,
+  addAction,
 }: {
   onClose: () => void;
   target: string;
+  addAction: AddAction;
 }) => {
   const { safeInformation } = useOutletContext<SafeContext>();
-  const updateProposalViaQuery = useUpdateProposalViaQuery();
   const toaster = useToast();
 
   const onSubmitClick = async ({ threshold }: any) => {
@@ -110,13 +114,13 @@ const RemoveOwnerModalContent = ({
         {
           ownerAddress: target,
           threshold: threshold,
-        },
+        }
       );
       if (!removeOwnerTx || !safeInformation) {
         return;
       }
 
-      updateProposalViaQuery({
+      addAction({
         data: removeOwnerTx.data.data,
         value: "0",
         to: safeInformation.address,
@@ -158,16 +162,24 @@ const RemoveOwnerModalContent = ({
 export const SetOwnerModal = ({
   action,
   onClose,
+  addAction,
 }: {
   action: OwnerAction;
   onClose: () => void;
+  addAction: AddAction;
 }) => {
   return (
     <Modal active={!!action} onClose={onClose}>
       {action?.type === "remove" && (
-        <RemoveOwnerModalContent onClose={onClose} target={action.address} />
+        <RemoveOwnerModalContent
+          onClose={onClose}
+          target={action.address}
+          addAction={addAction}
+        />
       )}
-      {action?.type === "add" && <AddOwnerModalContent onClose={onClose} />}
+      {action?.type === "add" && (
+        <AddOwnerModalContent onClose={onClose} addAction={addAction} />
+      )}
     </Modal>
   );
 };
