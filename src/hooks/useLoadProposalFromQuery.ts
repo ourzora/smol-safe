@@ -5,17 +5,20 @@ import { Proposal } from "../schemas/proposal";
 export const queryKeys = {
   targets: "targets",
   calldatas: "calldatas",
-  values: "values"
-};
+  values: "values",
+  nonce: "nonce",
+} as const;
 
 export const useLoadProposalFromQuery = () => {
   const [proposal, setProposal] = useState<undefined | Proposal>();
   const [params] = useSearchParams();
 
   useEffect(() => {
-    const targets = params.get(queryKeys.targets)?.split("|");
-    const calldatas = params.get(queryKeys.calldatas)?.split("|");
-    const values = params.get(queryKeys.values)?.split("|");
+    const targets = params.get(queryKeys["targets"])?.split("|");
+    const calldatas = params.get(queryKeys["calldatas"])?.split("|");
+    const values = params.get(queryKeys["values"])?.split("|");
+    const nonce = params.get(queryKeys["nonce"]);
+
     if (targets && calldatas) {
       // ensure the 3 lengths are the same.  check if values also has the same length if its not empty
       // check the inverse of the above, if inverse is true, return:
@@ -32,7 +35,10 @@ export const useLoadProposalFromQuery = () => {
         data: calldatas[index]!,
         value: (values && values[index]) || "0",
       }));
-      setProposal({ actions });
+
+      console.log({ actions, txt: "setting proposal" });
+
+      setProposal({ actions, ...(nonce ? { [queryKeys.nonce]: nonce } : {}) });
     }
   }, [params, setProposal]);
 

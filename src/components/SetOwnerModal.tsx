@@ -1,4 +1,4 @@
-import { SyntheticEvent } from "react";
+import { SyntheticEvent, useContext } from "react";
 import { Button, Modal, Text, View, useToast } from "reshaped";
 import { AddressView } from "./AddressView";
 import { Address } from "viem";
@@ -6,8 +6,10 @@ import { Field, Form, Formik } from "formik";
 import { GenericField } from "./GenericField";
 import { yupAddress } from "../utils/validators";
 import { number, object } from "yup";
-import { useOutletContext, useSearchParams } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import { SafeContext } from "./Contexts";
+import { ProposalContext } from "../app/NewSafeProposal";
+import { useUpdateProposalViaQuery } from "../hooks/useUpdateProposalViaQuery";
 
 export type OwnerAction =
   | undefined
@@ -43,7 +45,9 @@ const ButtonPanel = ({
 const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
   const { safeInformation } = useOutletContext<SafeContext>();
   const toast = useToast();
-  const [, setSearchParams] = useSearchParams();
+  const updateProposalQuery = useUpdateProposalViaQuery();
+  const currentProposal = useContext(ProposalContext);
+
   return (
     <Formik
       initialValues={{ address: "0x", threshold: safeInformation?.threshold }}
@@ -58,16 +62,10 @@ const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
             ownerAddress: address,
             threshold: threshold,
           });
-          setSearchParams({
-            proposal: JSON.stringify({
-              actions: [
-                {
-                  data: addOwnerTx.data.data,
-                  value: 0,
-                  to: safeInformation.address,
-                },
-              ],
-            }),
+          updateProposalQuery({
+            data: addOwnerTx.data.data,
+            value: "0",
+            to: safeInformation.address,
           });
         } catch (err: any) {
           toast.show({ title: "Error Updating Safe", text: err.toString() });
@@ -76,7 +74,7 @@ const AddOwnerModalContent = ({ onClose }: { onClose: () => void }) => {
       }}
     >
       <Form>
-        <Text variant="featured-2">Add Owner</Text>
+        <Text variant="featured-2">Add Signer</Text>
         <Field name="address">
           {GenericField({ label: "New User Address" })}
         </Field>
@@ -102,25 +100,34 @@ const RemoveOwnerModalContent = ({
   onClose: () => void;
   target: string;
 }) => {
-  const [_, setParams] = useSearchParams();
   const { safeInformation } = useOutletContext<SafeContext>();
+  const updateProposalViaQuery = useUpdateProposalViaQuery();
+  const toaster = useToast();
 
   const onSubmitClick = async ({ threshold }: any) => {
-    const removeOwnerTx = await safeInformation?.safeSdk.createRemoveOwnerTx({
-      ownerAddress: safeInformation!.address,
-      threshold: threshold,
-    });
-    if (!removeOwnerTx || !safeInformation) {
-      return;
+    try {
+      const removeOwnerTx = await safeInformation?.safeSdk2.createRemoveOwnerTx(
+        {
+          ownerAddress: target,
+          threshold: threshold,
+        },
+      );
+      if (!removeOwnerTx || !safeInformation) {
+        return;
+      }
+
+      updateProposalViaQuery({
+        data: removeOwnerTx.data.data,
+        value: "0",
+        to: safeInformation.address,
+      });
+      onClose();
+    } catch (err: any) {
+      toaster.show({
+        title: "Error Removing Owner",
+        text: `Error setting up transaction: ${err.toString()}`,
+      });
     }
-    setParams({
-      proposal: JSON.stringify({
-        actions: [
-          { data: removeOwnerTx.data, value: "0", to: safeInformation.address },
-        ],
-      }),
-    });
-    onClose();
   };
   return (
     <Formik

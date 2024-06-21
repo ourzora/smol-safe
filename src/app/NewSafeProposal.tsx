@@ -1,7 +1,13 @@
 import { Field, FieldArray, Formik } from "formik";
 import { SafeInformation } from "../components/SafeInformation";
 import { Card, View, Text, Button, useToast } from "reshaped";
-import { SyntheticEvent, useCallback, useEffect, useState } from "react";
+import {
+  SyntheticEvent,
+  createContext,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { Address, Hex, formatEther } from "viem";
 import { validateAddress, validateETH } from "../utils/validators";
 import { GenericField } from "../components/GenericField";
@@ -404,6 +410,8 @@ const EditProposal = ({
   );
 };
 
+export const ProposalContext = createContext<Proposal | undefined>(undefined);
+
 export const NewSafeProposal = () => {
   const [proposal, setProposal] = useState<undefined | Proposal>(
     DEFAULT_PROPOSAL,
@@ -428,22 +436,24 @@ export const NewSafeProposal = () => {
   );
 
   return (
-    <View paddingTop={4} paddingBottom={8} gap={8}>
-      <SafeInformation>
-        {isEditing && (
-          <EditProposal
-            proposal={proposal}
-            setProposal={setProposal}
-            setIsEditing={setIsEditing}
-          />
-        )}
-        {!isEditing && proposal && (
-          <ViewProposal
-            proposal={proposal}
-            handleEditClicked={handleEditClicked}
-          />
-        )}
-      </SafeInformation>
-    </View>
+    <ProposalContext.Provider value={proposal}>
+      <View paddingTop={4} paddingBottom={8} gap={8}>
+        <SafeInformation>
+          {isEditing && (
+            <EditProposal
+              proposal={proposal}
+              setProposal={setProposal}
+              setIsEditing={setIsEditing}
+            />
+          )}
+          {!isEditing && proposal && (
+            <ViewProposal
+              proposal={proposal}
+              handleEditClicked={handleEditClicked}
+            />
+          )}
+        </SafeInformation>
+      </View>
+    </ProposalContext.Provider>
   );
 };
