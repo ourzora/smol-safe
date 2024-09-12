@@ -20,7 +20,7 @@ export const useLoadProposalFromQuery = () => {
     const nonce = params.get(queryKeys["nonce"]);
 
     if (targets && calldatas) {
-      // ensure the 3 lengths are the same.  check if values also has the same length if its not empty
+      // ensure the 3 lengths are the same.  check if values also have the same length if it's not empty
       // check the inverse of the above, if inverse is true, return:
       if (
         targets.length !== calldatas.length ||
