@@ -246,7 +246,7 @@ const ViewProposal = ({
 
   const hasApproved = address ? approvers.includes(address as Address) : false;
 
-  // count others that are needed to sign, taking into account self must have signed, and if self has signed
+  // count others that are needed to sign, taking into account that self must have signed, and if self has signed
   // exclude from others needed to sign
   const canExecute = determineIfCanExecute({
     hasApproved,
