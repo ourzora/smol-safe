@@ -34,6 +34,7 @@ export const contractNetworks: ContractNetworksConfig = {
   [`${chains.blast.id}`]: defaultL2Addresses,
   [`${chains.zksyncSepoliaTestnet.id}`]: zkAddresses,
   [`${chains.zksync.id}`]: zkAddresses,
+  [`${chains.abstractTestnet.id}`]: zkAddresses,
 };
 
 export const allowedNetworks: { [chainId: number]: chains.Chain } = {
@@ -51,8 +52,8 @@ export const allowedNetworks: { [chainId: number]: chains.Chain } = {
   [chains.optimismSepolia.id]: chains.optimismSepolia,
   [chains.blastSepolia.id]: chains.blastSepolia,
   [chains.blast.id]: chains.blast,
-  [chains.zkSync.id]: chains.zkSync,
-  [chains.zkSyncSepoliaTestnet.id]: chains.zkSyncSepoliaTestnet,
+  [chains.zksync.id]: chains.zkSync,
+  [chains.zksyncSepoliaTestnet.id]: chains.zksyncSepoliaTestnet,
 };
 
 Object.keys(contractNetworks).map((network) => {
