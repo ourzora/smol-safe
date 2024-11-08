@@ -320,7 +320,7 @@ const EditProposal = ({
         setProposal(proposal);
       }
     },
-    [setProposal]
+    [setProposal],
   );
 
   const defaultActions = proposal || DEFAULT_PROPOSAL;
@@ -399,7 +399,7 @@ export const NewSafeProposal = () => {
       setIsEditing(true);
       evt.preventDefault();
     },
-    [setIsEditing]
+    [setIsEditing],
   );
 
   return (

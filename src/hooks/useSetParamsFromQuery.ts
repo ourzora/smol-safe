@@ -46,6 +46,6 @@ export const useRedirectToProposalWithNewParams = () => {
       }
       setParams(params);
     },
-    [setParams, networkId, safeAddress, pathname, navigate]
+    [setParams, networkId, safeAddress, pathname, navigate],
   );
 };
