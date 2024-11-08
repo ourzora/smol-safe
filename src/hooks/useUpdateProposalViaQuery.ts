@@ -3,7 +3,7 @@ import { Proposal } from "../schemas/proposal";
 import { useRedirectToProposalWithNewParams } from "./useSetParamsFromQuery";
 
 export type AddAction = (
-  newAction: NonNullable<Proposal["actions"]>[0]
+  newAction: NonNullable<Proposal["actions"]>[0],
 ) => void;
 
 export type UpdateProposal = {
@@ -24,7 +24,7 @@ export const useUpdateProposalInQuery = ({
         nonce: proposal?.nonce,
       });
     },
-    [proposal, setParams]
+    [proposal, setParams],
   );
 
   return {

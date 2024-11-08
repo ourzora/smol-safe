@@ -114,7 +114,7 @@ const RemoveOwnerModalContent = ({
         {
           ownerAddress: target,
           threshold: threshold,
-        }
+        },
       );
       if (!removeOwnerTx || !safeInformation) {
         return;
