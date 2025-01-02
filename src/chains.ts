@@ -26,6 +26,18 @@ const zkAddresses: ContractNetworkConfig = {
   simulateTxAccessorAddress: "0x4191E2e12E8BC5002424CE0c51f9947b02675a44",
 };
 
+const plumeAddresses: ContractNetworkConfig = {
+  multiSendAddress: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+  safeProxyFactoryAddress: "0x4e1dcf7ad4e460cfd30791ccc4f9c8a4f820ec67",
+  multiSendCallOnlyAddress: "0x9641d764fc13c8b624c04430c7356c1c7c8102e2",
+  fallbackHandlerAddress: "0xfd0732dc9e303f09fcef3a7388ad10a83459ec99",
+  createCallAddress: "0x9b35af71d77eaf8d7e40252370304687390a1a52",
+  signMessageLibAddress: "0xd53cd0ab83d845ac265be939c57f53ad838012c9",
+
+  safeSingletonAddress: "0x41675c099f32341bf84bfc5382af534df5c7461a",
+  simulateTxAccessorAddress: "0x3d4ba2e0884aa488718476ca2fb8efc291a46199",
+};
+
 // Example how to add new networks before they are merged and released from `safe-global/safe-deployments` package.
 export const contractNetworks: ContractNetworksConfig = {
   [`${chains.zoraSepolia.id}`]: defaultL2Addresses,
@@ -35,6 +47,7 @@ export const contractNetworks: ContractNetworksConfig = {
   [`${chains.zksyncSepoliaTestnet.id}`]: zkAddresses,
   [`${chains.zksync.id}`]: zkAddresses,
   [`${chains.abstractTestnet.id}`]: zkAddresses,
+  [`${chains.plume.id}`]: plumeAddresses,
 };
 
 export const allowedNetworks: { [chainId: number]: chains.Chain } = {
@@ -54,6 +67,7 @@ export const allowedNetworks: { [chainId: number]: chains.Chain } = {
   [chains.blast.id]: chains.blast,
   [chains.zksync.id]: chains.zkSync,
   [chains.zksyncSepoliaTestnet.id]: chains.zksyncSepoliaTestnet,
+  [chains.plume.id]: chains.plume,
 };
 
 Object.keys(contractNetworks).map((network) => {
