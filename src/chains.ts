@@ -28,13 +28,15 @@ const zkAddresses: ContractNetworkConfig = {
 
 // Example how to add new networks before they are merged and released from `safe-global/safe-deployments` package.
 export const contractNetworks: ContractNetworksConfig = {
+  [`${chains.abstractTestnet.id}`]: zkAddresses,
+  [`${chains.abstract.id}`]: zkAddresses,
   [`${chains.zoraSepolia.id}`]: defaultL2Addresses,
   [`${chains.blastSepolia.id}`]: defaultL2Addresses,
   [`${chains.optimismSepolia.id}`]: defaultL2Addresses,
   [`${chains.blast.id}`]: defaultL2Addresses,
+  [`${chains.unichainSepolia.id}`]: defaultL2Addresses,
   [`${chains.zksyncSepoliaTestnet.id}`]: zkAddresses,
   [`${chains.zksync.id}`]: zkAddresses,
-  [`${chains.abstractTestnet.id}`]: zkAddresses,
 };
 
 export const allowedNetworks: { [chainId: number]: chains.Chain } = {
@@ -54,6 +56,9 @@ export const allowedNetworks: { [chainId: number]: chains.Chain } = {
   [chains.blast.id]: chains.blast,
   [chains.zksync.id]: chains.zkSync,
   [chains.zksyncSepoliaTestnet.id]: chains.zksyncSepoliaTestnet,
+  [chains.unichainSepolia.id]: chains.unichainSepolia,
+  [chains.abstractTestnet.id]: chains.abstractTestnet,
+  [chains.abstract.id]: chains.abstract,
 };
 
 Object.keys(contractNetworks).map((network) => {
@@ -62,7 +67,7 @@ Object.keys(contractNetworks).map((network) => {
     return;
   }
   const viemChain = Object.values(chains).find(
-    (chain) => chain.id.toString() === network,
+    (chain) => chain.id.toString() === network
   );
 
   if (!viemChain) {
