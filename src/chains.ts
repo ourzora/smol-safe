@@ -1,5 +1,4 @@
-import { ContractNetworksConfig } from "@safe-global/protocol-kit";
-import { ContractNetworkConfig } from "@safe-global/protocol-kit/dist/src/types";
+import { ContractNetworksConfig, ContractNetworkConfig } from "@safe-global/protocol-kit";
 import * as chains from "viem/chains";
 
 const defaultL2Addresses: ContractNetworkConfig = {
@@ -40,6 +39,7 @@ export const contractNetworks: ContractNetworksConfig = {
 };
 
 export const allowedNetworks: { [chainId: number]: chains.Chain } = {
+  [chains.mainnet.id]: chains.mainnet,
   [chains.zora.id]: chains.zora,
   [chains.zoraTestnet.id]: chains.zoraTestnet,
   [chains.zoraSepolia.id]: chains.zoraSepolia,

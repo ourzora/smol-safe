@@ -3,8 +3,7 @@ import { Field, FieldArray, Formik } from "formik";
 import { Text, Button, FormControl, TextField, View, useToast } from "reshaped";
 import { allowedNetworks, contractNetworks } from "../chains";
 import { isAddress } from "viem";
-import { ethers } from "ethers";
-import { EthersAdapter, SafeFactory } from "@safe-global/protocol-kit";
+import Safe, { SafeAccountConfig, SafeDeploymentConfig, SafeProvider } from "@safe-global/protocol-kit";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { AbstractSigner } from "ethers";
 import { BrowserProvider } from "ethers";
@@ -59,21 +58,43 @@ export function CreateSafe() {
         return;
       }
       try {
-        const ethAdapter = new EthersAdapter({
-          ethers,
-          signerOrProvider: signerInfo.signer,
+        const safeAccountConfig: SafeAccountConfig = {
+          owners: data.addresses,
+          threshold: parseInt(data.threshold, 10),
+        };
+
+        const safeDeploymentConfig: SafeDeploymentConfig = {
+          saltNonce: Date.now().toString(),
+        };
+
+        // Create SafeProvider
+        const safeProvider = new SafeProvider({
+          provider: (window as any).ethereum,
+          signer: await signerInfo.signer.getAddress(),
         });
-        const adapter = await SafeFactory.create({
-          ethAdapter: ethAdapter,
+
+        // Create and deploy the Safe
+        const safeSdk = await Safe.init({
+          provider: (window as any).ethereum,
+          signer: await signerInfo.signer.getAddress(),
+          predictedSafe: {
+            safeAccountConfig,
+            safeDeploymentConfig,
+          },
           contractNetworks,
         });
-        const sdk = await adapter.deploySafe({
-          safeAccountConfig: {
-            owners: data.addresses,
-            threshold: parseInt(data.threshold, 10),
-          },
+
+        // Deploy the Safe
+        const deploymentTransaction = await safeSdk.createSafeDeploymentTransaction();
+        const txResponse = await signerInfo.signer.sendTransaction({
+          to: deploymentTransaction.to,
+          data: deploymentTransaction.data,
+          value: deploymentTransaction.value,
         });
-        const newAddress = await sdk.getAddress();
+
+        await txResponse.wait();
+
+        const newAddress = await safeSdk.getAddress();
         toaster.show({
           title: "Created a new safe!",
           text: `Opening safe... The new safe address is ${newAddress}`,

@@ -5,6 +5,7 @@ import { Button, View } from "reshaped";
 import { NetworkSwitcher } from "../components/NetworkSwitcher";
 import { BrowserProvider } from "ethers";
 import { NetworkContext } from "../components/Contexts";
+import { allowedNetworks } from "../chains";
 
 export const Root = () => {
   const [provider, setProvider] = useState<
@@ -13,9 +14,48 @@ export const Root = () => {
   const networkIdFromRoute = useParams().networkId;
 
   const [currentNetwork, setCurrentNetwork] = useState<number>(0);
+  const [multichainSession, setMultichainSession] = useState<boolean>(false);
 
   const connectMetamask = useCallback(async () => {
     const provider = new BrowserProvider((window as any).ethereum, "any");
+
+    // Check if MetaMask supports multichain API
+    const isMultichainSupported = typeof (window as any).ethereum?.request === 'function';
+
+    if (isMultichainSupported) {
+      try {
+        // Create a multichain session with all allowed networks
+        const optionalScopes = Object.keys(allowedNetworks).reduce((acc, chainId) => {
+          acc[`eip155:${chainId}`] = {
+            methods: [
+              "eth_sendTransaction",
+              "eth_signTransaction",
+              "eth_sign",
+              "personal_sign",
+              "eth_signTypedData",
+              "eth_signTypedData_v4",
+              "eth_getBalance",
+              "eth_call"
+            ],
+            accounts: []
+          };
+          return acc;
+        }, {} as Record<string, any>);
+
+        await (window as any).ethereum.request({
+          method: "wallet_createSession",
+          params: {
+            optionalScopes
+          }
+        });
+
+        setMultichainSession(true);
+        console.log("Multichain session created");
+      } catch (error) {
+        console.log("Multichain API not available, falling back to standard connection", error);
+      }
+    }
+
     provider.on("accountsChanged", async (accounts) => {
       console.log({ accounts });
       const newNetwork = await provider.getNetwork();
@@ -24,6 +64,7 @@ export const Root = () => {
     provider.on("disconnect", () => {
       setProvider(undefined);
       setCurrentNetwork(0);
+      setMultichainSession(false);
     });
     provider.on("connect", async () => {
       setProvider(provider);
