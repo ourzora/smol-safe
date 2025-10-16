@@ -50,5 +50,5 @@
     "typescript": "^5.3.2",
     "vite": "^5.0.2"
   },
-  "packageManager": "pnpm@10.18.2"
+  "packageManager": "pnpm@10.18.3"
 }
