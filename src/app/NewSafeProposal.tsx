@@ -84,11 +84,9 @@ const signTx = async ({
   if (!txn) {
     throw new Error("No txn");
   }
-  // const executedTxn = await safe.executeTransaction(txn);
-  // const response = await executedTxn.transactionResponse?.wait();
   const txHash = await safe.getTransactionHash(txn);
   const executedTxn = await safe.approveTransactionHash(txHash);
-  /*const response = */ await executedTxn.transactionResponse?.wait();
+  // In v6, the transaction is already executed when approveTransactionHash returns
 
   return executedTxn;
 };
@@ -108,7 +106,7 @@ const signAndExecuteTx = async ({
     throw new Error("No txn");
   }
   const executedTxn = await safe.executeTransaction(txn);
-  /*const response = */ await executedTxn.transactionResponse?.wait();
+  // In v6, the transaction is already executed when executeTransaction returns
 
   return executedTxn;
 };

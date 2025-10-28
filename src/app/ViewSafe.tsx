@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Outlet, useOutletContext, useParams } from "react-router-dom";
-import { Signer, ethers } from "ethers";
-import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
+import { Signer } from "ethers";
+import Safe from "@safe-global/protocol-kit";
 import { contractNetworks } from "../chains";
 import { Button, View, Text } from "reshaped";
 import { Address } from "viem";
@@ -14,22 +14,22 @@ import {
 type SafeData = Awaited<ReturnType<typeof getSafeSDK>>;
 
 async function getSafeSDK(safeAddress: string, signer: Signer) {
-  const ethAdapter = new EthersAdapter({
-    ethers,
-    signerOrProvider: signer,
-  });
+  const signerAddress = await signer.getAddress();
 
-  const safeSdk: Safe = await Safe.create({
-    ethAdapter: ethAdapter,
+  const safeSdk: Safe = await Safe.init({
+    provider: (window as any).ethereum,
+    signer: signerAddress,
     safeAddress,
     contractNetworks,
   });
 
-  const safeSdk2 = await safeSdk.connect({
-    ethAdapter: new EthersAdapter({ ethers, signerOrProvider: signer }),
+  const safeSdk2 = await Safe.init({
+    provider: (window as any).ethereum,
+    signer: signerAddress,
     safeAddress,
     contractNetworks,
   });
+
   return { safeSdk, safeSdk2, signer };
 }
 
