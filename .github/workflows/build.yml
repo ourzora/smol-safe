@@ -9,11 +9,9 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@master
-      
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        with:
-            run_install: true
+
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
 
       - name: Build 🏗️
         run: pnpm build
